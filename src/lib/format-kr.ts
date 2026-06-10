@@ -1,0 +1,51 @@
+export function digitsOnly(value: string): string {
+  return value.replace(/\D/g, "")
+}
+
+export function formatBusinessNumber(value: string): string {
+  const digits = digitsOnly(value).slice(0, 10)
+  if (digits.length <= 3) return digits
+  if (digits.length <= 5) return `${digits.slice(0, 3)}-${digits.slice(3)}`
+  return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`
+}
+
+export function formatPhoneNumber(value: string): string {
+  const digits = digitsOnly(value)
+  if (!digits) return ""
+
+  if (digits.startsWith("02")) {
+    if (digits.length <= 2) return digits
+    if (digits.length <= 5) return `${digits.slice(0, 2)}-${digits.slice(2)}`
+    if (digits.length <= 9) {
+      return `${digits.slice(0, 2)}-${digits.slice(2, digits.length - 4)}-${digits.slice(-4)}`
+    }
+    return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6, 10)}`
+  }
+
+  if (digits.startsWith("010")) {
+    if (digits.length <= 3) return digits
+    if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`
+  }
+
+  if (
+    digits.startsWith("050") ||
+    digits.startsWith("070") ||
+    digits.startsWith("080")
+  ) {
+    if (digits.length <= 4) return digits
+    if (digits.length <= 8) return `${digits.slice(0, 4)}-${digits.slice(4)}`
+    return `${digits.slice(0, 4)}-${digits.slice(4, 8)}-${digits.slice(8, 12)}`
+  }
+
+  if (digits.startsWith("1")) {
+    return digits.slice(0, 4)
+  }
+
+  if (digits.length <= 3) return digits
+  if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`
+  if (digits.length <= 10) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, digits.length - 4)}-${digits.slice(-4)}`
+  }
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`
+}
