@@ -14,6 +14,7 @@ import {
   formatBusinessNumber,
   formatPhoneNumber,
 } from "@/lib/format-kr"
+import { numberToKorean } from "@/lib/number-to-korean"
 import { cn } from "@/lib/utils"
 
 /** PDF 캡처용 hex 색상 (html2canvas oklch/lab 미지원) */
@@ -175,6 +176,28 @@ export function EstimatePreview({
             >
               <p
                 className="mb-2 text-xs font-semibold uppercase tracking-wide"
+                style={{ color: DOC.textMuted }}
+              >
+                수신
+              </p>
+              <PreviewField label="고객명" value={data.customer.name} />
+              <PreviewField label="회사명" value={data.customer.companyName} />
+              {!data.customer.name && !data.customer.companyName && (
+                <p className="text-sm" style={{ color: DOC.textLight }}>
+                  -
+                </p>
+              )}
+            </div>
+
+            <div
+              className="flex-1 space-y-2 rounded-lg border p-4"
+              style={{
+                borderColor: DOC.border,
+                backgroundColor: DOC.bgMutedSoft,
+              }}
+            >
+              <p
+                className="mb-2 text-xs font-semibold uppercase tracking-wide"
                 style={{ color: DOC.primary }}
               >
                 공급자
@@ -202,28 +225,24 @@ export function EstimatePreview({
                   </p>
                 )}
             </div>
+          </div>
 
-            <div
-              className="flex-1 space-y-2 rounded-lg border p-4"
-              style={{
-                borderColor: DOC.border,
-                backgroundColor: DOC.bgMutedSoft,
-              }}
+          <div
+            className="mb-7 flex items-center justify-between gap-4 border-y py-3.5 text-sm"
+            style={{
+              borderColor: DOC.border,
+              backgroundColor: DOC.bgMuted,
+            }}
+          >
+            <span
+              className="shrink-0 font-semibold"
+              style={{ color: DOC.textDark }}
             >
-              <p
-                className="mb-2 text-xs font-semibold uppercase tracking-wide"
-                style={{ color: DOC.textMuted }}
-              >
-                수신
-              </p>
-              <PreviewField label="고객명" value={data.customer.name} />
-              <PreviewField label="회사명" value={data.customer.companyName} />
-              {!data.customer.name && !data.customer.companyName && (
-                <p className="text-sm" style={{ color: DOC.textLight }}>
-                  -
-                </p>
-              )}
-            </div>
+              합계금액
+            </span>
+            <span className="font-medium" style={{ color: DOC.text }}>
+              일금 {numberToKorean(totals.total)}원정 (₩{formatKRW(totals.total)})
+            </span>
           </div>
 
           <div className="overflow-visible">
