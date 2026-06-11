@@ -1,25 +1,23 @@
 import type { Metadata } from "next"
 
-import { ComingSoon } from "@/components/coming-soon"
+import { DeliveryMarginCalculator } from "@/components/calculators/delivery-margin-calculator"
 import { PageHeader } from "@/components/page-header"
 import { SiteLayout } from "@/components/site-layout"
 
 export const metadata: Metadata = {
-  title: "배달 마진 계산기 | 사장만",
+  title: "배달 수수료·순이익 비교 계산기 | 사장만",
   description:
-    "판매가와 비용을 입력하면 배달 주문의 순이익과 마진율을 계산합니다.",
+    "배달의민족, 쿠팡이츠, 요기요, 땡겨요의 예상 정산금액, 순이익, 마진율을 비교할 수 있습니다.",
 }
 
 export default function DeliveryMarginPage() {
   return (
     <SiteLayout>
       <PageHeader
-        title="배달 마진 계산기"
-        description="판매가와 비용을 입력하면 배달 주문의 순이익과 마진율을 계산합니다."
+        title="배달 수수료·순이익 비교 계산기"
+        description="배달의민족, 쿠팡이츠, 요기요, 땡겨요의 예상 정산금액, 순이익, 마진율을 비교할 수 있습니다."
       />
-      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-        <ComingSoon />
-      </div>
+      <DeliveryMarginCalculator />
     </SiteLayout>
   )
 }
