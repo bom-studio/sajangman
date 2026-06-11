@@ -107,7 +107,10 @@ export function SealEditorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-5 sm:max-w-lg">
+      <DialogContent
+        data-html2canvas-ignore="true"
+        className="gap-5 sm:max-w-lg"
+      >
         <DialogHeader>
           <DialogTitle>직인 이미지 삽입</DialogTitle>
           <DialogDescription>
@@ -126,6 +129,7 @@ export function SealEditorDialog({
               type="file"
               accept="image/png,image/jpeg,image/jpg"
               className="hidden"
+              data-html2canvas-ignore="true"
               onChange={handleFileSelect}
             />
             <Button

@@ -1,7 +1,11 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
+import path from "path"
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  serverExternalPackages: ["html2canvas", "jspdf"],
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
+}
 
-export default nextConfig;
+export default nextConfig

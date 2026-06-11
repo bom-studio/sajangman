@@ -24,6 +24,8 @@ import {
 import {
   calculateEstimate,
   createEmptyItem,
+  DEFAULT_ESTIMATE_UNIT,
+  ESTIMATE_UNIT_OPTIONS,
   formatKRW,
   type EstimateData,
 } from "@/lib/estimate"
@@ -222,6 +224,7 @@ export function EstimateForm({ data, onChange }: EstimateFormProps) {
               <TableRow>
                 <TableHead>품목명</TableHead>
                 <TableHead className="w-20">수량</TableHead>
+                <TableHead className="w-24">단위</TableHead>
                 <TableHead className="w-28">단가</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
@@ -251,6 +254,23 @@ export function EstimateForm({ data, onChange }: EstimateFormProps) {
                         )
                       }
                     />
+                  </TableCell>
+                  <TableCell>
+                    <select
+                      value={item.unit || DEFAULT_ESTIMATE_UNIT}
+                      onChange={(e) =>
+                        updateItem(item.id, "unit", e.target.value)
+                      }
+                      className={cn(
+                        "h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-2.5 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
+                      )}
+                    >
+                      {ESTIMATE_UNIT_OPTIONS.map((unit) => (
+                        <option key={unit} value={unit}>
+                          {unit}
+                        </option>
+                      ))}
+                    </select>
                   </TableCell>
                   <TableCell>
                     <Input

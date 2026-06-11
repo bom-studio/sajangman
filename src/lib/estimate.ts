@@ -1,9 +1,30 @@
 import { addDaysToDateString, getTodayKST } from "@/lib/date-kst"
 
+export const ESTIMATE_UNIT_OPTIONS = [
+  "EA",
+  "개",
+  "건",
+  "식",
+  "시간",
+  "일",
+  "월",
+  "년",
+  "세트",
+  "매",
+  "박스",
+  "kg",
+  "g",
+  "m",
+  "cm",
+] as const
+
+export const DEFAULT_ESTIMATE_UNIT = "EA"
+
 export interface EstimateItem {
   id: string
   name: string
   quantity: number
+  unit: string
   unitPrice: number
 }
 
@@ -50,6 +71,7 @@ export function createEmptyItem(): EstimateItem {
     id: createItemId(),
     name: "",
     quantity: 1,
+    unit: DEFAULT_ESTIMATE_UNIT,
     unitPrice: 0,
   }
 }
