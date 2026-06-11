@@ -1,12 +1,13 @@
 import type { Metadata } from "next"
 
-import { ComingSoon } from "@/components/coming-soon"
+import { StatementGenerator } from "@/components/statement/statement-generator"
 import { PageHeader } from "@/components/page-header"
 import { SiteLayout } from "@/components/site-layout"
 
 export const metadata: Metadata = {
   title: "거래명세서 생성기 | 사장만",
-  description: "공급자와 품목 정보를 입력해 거래명세서를 작성합니다.",
+  description:
+    "거래처와 품목 정보를 입력하고 회사 직인을 넣어 거래명세서를 PDF로 다운로드하세요.",
 }
 
 export default function StatementPage() {
@@ -14,11 +15,9 @@ export default function StatementPage() {
     <SiteLayout>
       <PageHeader
         title="거래명세서 생성기"
-        description="공급자와 품목 정보를 입력해 거래명세서를 작성합니다."
+        description="거래처와 품목 정보를 입력하고 회사 직인을 넣어 거래명세서를 PDF로 다운로드하세요."
       />
-      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-        <ComingSoon />
-      </div>
+      <StatementGenerator />
     </SiteLayout>
   )
 }

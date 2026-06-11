@@ -66,9 +66,7 @@ function hasUnsupportedColorFunction(value: string): boolean {
 }
 
 /** 개발 중 PDF 캡처 대상의 oklch/lab 색상 사용 여부를 검사한다. */
-export function warnUnsupportedColorsInEstimateDocument(
-  element: HTMLElement
-): void {
+export function warnUnsupportedColorsInDocument(element: HTMLElement): void {
   const nodes = [element, ...Array.from(element.querySelectorAll("*"))]
 
   for (const node of nodes) {
@@ -230,16 +228,17 @@ function prepareElementForCapture(element: HTMLElement): () => void {
   return () => runCleanups(cleanups)
 }
 
-export async function downloadEstimatePdf(
+export async function downloadDocumentPdf(
   element: HTMLElement,
-  filename: string
+  filename: string,
+  documentId: string = ESTIMATE_DOCUMENT_ID
 ): Promise<void> {
   if (typeof window === "undefined") {
     throw new Error("PDF 생성은 브라우저에서만 가능합니다.")
   }
 
   if (!(element instanceof HTMLElement)) {
-    throw new Error("PDF 캡처 대상 estimate-document를 찾을 수 없습니다.")
+    throw new Error(`PDF 캡처 대상 ${documentId}를 찾을 수 없습니다.`)
   }
 
   validateImages(element)
@@ -252,7 +251,7 @@ export async function downloadEstimatePdf(
 
   const restoreStyles = prepareElementForCapture(element)
 
-  warnUnsupportedColorsInEstimateDocument(element)
+  warnUnsupportedColorsInDocument(element)
 
   try {
     const canvas = await html2canvas(element, {
@@ -263,8 +262,8 @@ export async function downloadEstimatePdf(
       logging: false,
       ignoreElements: shouldIgnoreElement,
       onclone: (clonedDocument) => {
-        const liveElement = document.getElementById(ESTIMATE_DOCUMENT_ID)
-        const clonedElement = clonedDocument.getElementById(ESTIMATE_DOCUMENT_ID)
+        const liveElement = document.getElementById(documentId)
+        const clonedElement = clonedDocument.getElementById(documentId)
 
         if (!(liveElement instanceof HTMLElement)) return
         if (!(clonedElement instanceof HTMLElement)) return
@@ -332,4 +331,11 @@ export async function downloadEstimatePdf(
       console.warn("PDF cleanup 실패:", error)
     }
   }
+}
+
+export async function downloadEstimatePdf(
+  element: HTMLElement,
+  filename: string
+): Promise<void> {
+  return downloadDocumentPdf(element, filename, ESTIMATE_DOCUMENT_ID)
 }
