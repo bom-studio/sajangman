@@ -10,9 +10,6 @@ export function HeroSection() {
 
       <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8 lg:py-32">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="mb-4 inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
-            사장님, 장사만 하세요.
-          </p>
 
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
             사장님, 장사만 하세요.
