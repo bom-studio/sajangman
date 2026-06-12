@@ -65,7 +65,7 @@ export function RelatedCalculators({
       <p className="mt-2 text-sm text-muted-foreground">
         다른 계산기도 함께 활용해 보세요.
       </p>
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
           <RelatedCalculatorCard key={item.href} {...item} />
         ))}

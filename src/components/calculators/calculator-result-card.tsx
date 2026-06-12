@@ -1,6 +1,18 @@
 import type { ReactNode } from "react"
 
-import { CalculatorCopyButton } from "@/components/calculators/calculator-copy-button"
+import { CalculatorResultActions } from "@/components/calculators/calculator-result-actions"
+import {
+  CALCULATOR_RESULT_EMPTY_MESSAGE,
+  ResultStatCard,
+  ResultStatEmptyState,
+  ResultStatGrid,
+  ResultStatMessage,
+} from "@/components/calculators/result-stat-card"
+import {
+  calculatorCardClass,
+  calculatorCardContentClass,
+  calculatorCardHeaderClass,
+} from "@/components/calculators/calculator-styles"
 import {
   Card,
   CardContent,
@@ -8,20 +20,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  calculatorCardClass,
-  calculatorCardContentClass,
-  calculatorCardHeaderClass,
-  calculatorHighlightClass,
-} from "@/components/calculators/calculator-styles"
+import type { CalculatorPdfRow } from "@/lib/calculators/calculator-pdf"
+import type { ResultStatus } from "@/lib/calculators/result-status"
 import { cn } from "@/lib/utils"
 
 export interface CalculatorResultItem {
   label: string
   value: string
   highlight?: boolean
+  emphasized?: boolean
   valueClassName?: string
   description?: string
+  className?: string
+  status?: ResultStatus
 }
 
 interface CalculatorResultCardProps {
@@ -32,48 +43,24 @@ interface CalculatorResultCardProps {
   headerAction?: ReactNode
   copyText?: string
   copyTitle?: string
+  shareContext?: string
   showCopy?: boolean
+  showPdf?: boolean
+  pdfTitle?: string
+  pdfSubtitle?: string
+  pdfFilename?: string
+  pdfRows?: CalculatorPdfRow[]
+  visualization?: ReactNode
   footer?: ReactNode
   message?: string | null
   emptyMessage?: string
   className?: string
 }
 
-function ResultMetric({
-  item,
-}: {
-  item: CalculatorResultItem
-}) {
-  return (
-    <div
-      className={cn(
-        "rounded-xl border border-slate-200 bg-slate-50/60 p-5 transition-colors",
-        item.highlight && "border-blue-200 bg-blue-50/50"
-      )}
-    >
-      <p
-        className={cn(
-          "text-3xl font-bold tracking-tight text-foreground sm:text-4xl",
-          item.highlight && calculatorHighlightClass,
-          item.valueClassName
-        )}
-      >
-        {item.value}
-      </p>
-      <p className="mt-2 text-sm text-muted-foreground">{item.label}</p>
-      {item.description && (
-        <p className="mt-1 text-xs leading-relaxed text-muted-foreground/80">
-          {item.description}
-        </p>
-      )}
-    </div>
-  )
-}
-
 export function CalculatorResultMetrics({
   items,
   message,
-  emptyMessage = "금액을 입력한 뒤 계산하기를 눌러주세요.",
+  emptyMessage = CALCULATOR_RESULT_EMPTY_MESSAGE,
   className,
 }: {
   items?: CalculatorResultItem[]
@@ -82,28 +69,20 @@ export function CalculatorResultMetrics({
   className?: string
 }) {
   if (message) {
-    return (
-      <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-800">
-        {message}
-      </p>
-    )
+    return <ResultStatMessage message={message} className={className} />
   }
 
   if (items?.length) {
     return (
-      <div className={cn("grid grid-cols-1 gap-4 sm:grid-cols-2", className)}>
+      <ResultStatGrid className={className}>
         {items.map((item) => (
-          <ResultMetric key={item.label} item={item} />
+          <ResultStatCard key={item.label} {...item} />
         ))}
-      </div>
+      </ResultStatGrid>
     )
   }
 
-  return (
-    <p className="text-sm leading-relaxed text-muted-foreground">
-      {emptyMessage}
-    </p>
-  )
+  return <ResultStatEmptyState message={emptyMessage} className={className} />
 }
 
 export function CalculatorResultCard({
@@ -114,21 +93,36 @@ export function CalculatorResultCard({
   headerAction,
   copyText,
   copyTitle,
+  shareContext,
   showCopy = true,
+  showPdf = false,
+  pdfTitle,
+  pdfSubtitle,
+  pdfFilename,
+  pdfRows,
+  visualization,
   footer,
   message,
-  emptyMessage = "금액을 입력한 뒤 계산하기를 눌러주세요.",
+  emptyMessage = CALCULATOR_RESULT_EMPTY_MESSAGE,
   className,
 }: CalculatorResultCardProps) {
   const hasItems = Boolean(items && items.length > 0)
-  const copyAction =
-    showCopy && hasItems ? (
-      <CalculatorCopyButton
+  const actions =
+    headerAction ??
+    (hasItems ? (
+      <CalculatorResultActions
         items={items}
-        text={copyText}
-        title={copyTitle ?? title}
+        shareText={copyText}
+        shareTitle={copyTitle ?? title}
+        shareContext={shareContext}
+        showShare={showCopy}
+        showPdf={showPdf}
+        pdfTitle={pdfTitle}
+        pdfSubtitle={pdfSubtitle}
+        pdfFilename={pdfFilename}
+        pdfRows={pdfRows}
       />
-    ) : null
+    ) : null)
 
   return (
     <Card className={cn(calculatorCardClass, className)}>
@@ -138,33 +132,35 @@ export function CalculatorResultCard({
             <CardTitle>{title}</CardTitle>
             {description && <CardDescription>{description}</CardDescription>}
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {copyAction}
-            {headerAction}
-          </div>
+          <div className="flex shrink-0 items-center gap-2">{actions}</div>
         </div>
       </CardHeader>
       <CardContent className={cn("space-y-4", calculatorCardContentClass)}>
         {message ? (
-          <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-800">
-            {message}
-          </p>
+          <ResultStatMessage message={message} />
         ) : hasItems ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <ResultStatGrid>
             {items!.map((item) => (
-              <ResultMetric key={item.label} item={item} />
+              <ResultStatCard key={item.label} {...item} />
             ))}
-          </div>
+          </ResultStatGrid>
         ) : children ? (
           children
         ) : (
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {emptyMessage}
-          </p>
+          <ResultStatEmptyState message={emptyMessage} />
         )}
 
+        {visualization}
         {footer}
       </CardContent>
     </Card>
   )
 }
+
+export {
+  CALCULATOR_RESULT_EMPTY_MESSAGE,
+  ResultStatCard,
+  ResultStatEmptyState,
+  ResultStatGrid,
+  ResultStatMessage,
+} from "@/components/calculators/result-stat-card"

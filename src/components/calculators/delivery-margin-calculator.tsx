@@ -7,7 +7,10 @@ import { CalculatorFaq } from "@/components/calculators/calculator-faq"
 import { CalculatorInputCard } from "@/components/calculators/calculator-input-card"
 import { CalculatorPageLayout } from "@/components/calculators/calculator-page-layout"
 import { CalculatorResultCard } from "@/components/calculators/calculator-result-card"
-import { DELIVERY_MARGIN_FAQ_ITEMS } from "@/lib/calculators/faq/delivery-margin-faq"
+import {
+  DELIVERY_MARGIN_FAQ_ITEMS,
+  DELIVERY_MARGIN_GUIDE_DESCRIPTION,
+} from "@/lib/calculators/faq/delivery-margin-faq"
 import {
   calculatorCardClass,
   calculatorCardContentClass,
@@ -691,8 +694,7 @@ export function DeliveryMarginCalculator() {
         }
         seo={
           <CalculatorFaq
-            title="배달 수수료·순이익 계산 가이드"
-            description="배달앱별 수수료 구조와 마진 계산 방법을 정리했습니다. 궁금한 항목을 눌러 내용을 확인하세요."
+            description={DELIVERY_MARGIN_GUIDE_DESCRIPTION}
             items={DELIVERY_MARGIN_FAQ_ITEMS}
           />
         }

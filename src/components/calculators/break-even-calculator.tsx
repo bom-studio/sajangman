@@ -5,6 +5,7 @@ import {
   CartesianGrid,
   Line,
   LineChart,
+  ReferenceDot,
   ReferenceLine,
   XAxis,
   YAxis,
@@ -48,7 +49,11 @@ import {
   parseAmountInput,
   parsePositiveNumber,
 } from "@/lib/calculators/break-even"
-import { BREAK_EVEN_FAQ_ITEMS } from "@/lib/calculators/faq/break-even-faq"
+import {
+  BREAK_EVEN_FAQ_ITEMS,
+  BREAK_EVEN_GUIDE_DESCRIPTION,
+} from "@/lib/calculators/faq/break-even-faq"
+import { getBreakEvenQuantityStatus } from "@/lib/calculators/result-status"
 import { cn } from "@/lib/utils"
 
 const chartConfig = {
@@ -121,9 +126,12 @@ function BreakEvenChart({
   return (
     <Card className={calculatorCardClass}>
       <CardHeader className={calculatorCardHeaderClass}>
-        <CardTitle>매출 vs 총비용 비교</CardTitle>
+        <CardTitle>매출 vs 총비용 (손익분기점)</CardTitle>
       </CardHeader>
       <CardContent className={cn("min-w-0", calculatorCardContentClass)}>
+        <p className="mb-4 text-xs text-muted-foreground">
+          X축: 판매수량 · Y축: 금액 · 교차점이 손익분기점입니다.
+        </p>
         <div className="w-full min-w-0 overflow-x-auto">
           <ChartContainer
             config={chartConfig}
@@ -131,7 +139,7 @@ function BreakEvenChart({
           >
           <LineChart
             data={chartData}
-            margin={{ top: 28, right: 12, left: 4, bottom: 0 }}
+            margin={{ top: 32, right: 12, left: 4, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
@@ -175,13 +183,23 @@ function BreakEvenChart({
               strokeWidth={2}
               strokeDasharray="6 4"
               label={{
-                value: `📍 손익분기점 ${formatQuantity(result.breakEvenQuantity)}`,
+                value: `손익분기점 ${formatQuantity(result.breakEvenQuantity)}`,
                 position: "insideTop",
                 fill: "#2563eb",
                 fontSize: 12,
                 fontWeight: 700,
               }}
             />
+            {result.breakEvenRevenue !== null && (
+              <ReferenceDot
+                x={result.breakEvenQuantity}
+                y={result.breakEvenRevenue}
+                r={7}
+                fill="#2563eb"
+                stroke="#ffffff"
+                strokeWidth={2}
+              />
+            )}
             <Line
               type="monotone"
               dataKey="revenue"
@@ -314,6 +332,67 @@ export function BreakEvenCalculator() {
       ? "판매가가 변동비보다 커야 손익분기점을 계산할 수 있습니다."
       : null
 
+  const bepStatus =
+    result.canBreakEven && result.breakEvenQuantity !== null
+      ? getBreakEvenQuantityStatus(result.breakEvenQuantity)
+      : undefined
+
+  const resultItems = [
+    {
+      label: "손익분기점 판매수량",
+      description: "손익분기를 넘기기 위해 필요한 최소 판매 수량",
+      value: result.canBreakEven
+        ? formatQuantity(result.breakEvenQuantity!)
+        : "계산 불가",
+      highlight: result.canBreakEven,
+      status: bepStatus,
+    },
+    {
+      label: "손익분기점 매출",
+      value: result.breakEvenRevenue
+        ? formatWon(result.breakEvenRevenue)
+        : "계산 불가",
+      highlight: result.canBreakEven,
+    },
+    {
+      label: "예상 순이익",
+      value: formatWon(result.expectedNetProfit),
+      highlight: true,
+      valueClassName:
+        result.expectedNetProfit >= 0
+          ? calculatorHighlightClass
+          : "text-amber-700",
+    },
+    {
+      label: "기여이익률",
+      value: formatPercent(result.contributionMarginRate),
+      highlight: true,
+    },
+  ]
+
+  const pdfRows = [
+    { label: "월 고정비", value: formatWon(result.fixedCost) },
+    { label: "판매가", value: formatWon(result.sellingPrice) },
+    { label: "변동비", value: formatWon(result.variableCost) },
+    {
+      label: "손익분기점 판매수량",
+      value: result.canBreakEven
+        ? formatQuantity(result.breakEvenQuantity!)
+        : "계산 불가",
+    },
+    {
+      label: "손익분기점 매출",
+      value: result.breakEvenRevenue
+        ? formatWon(result.breakEvenRevenue)
+        : "계산 불가",
+    },
+    { label: "예상 순이익", value: formatWon(result.expectedNetProfit) },
+    {
+      label: "기여이익률",
+      value: formatPercent(result.contributionMarginRate),
+    },
+  ]
+
   return (
     <CalculatorPageLayout
       excludeHref="/calculators/break-even"
@@ -371,41 +450,13 @@ export function BreakEvenCalculator() {
         <>
           <CalculatorResultCard
             message={breakEvenWarning}
-            items={[
-              {
-                label: "손익분기점 판매수량",
-                description:
-                  "손익분기를 넘기기 위해 필요한 최소 판매 수량",
-                value: result.canBreakEven
-                  ? formatQuantity(result.breakEvenQuantity!)
-                  : "계산 불가",
-                highlight: result.canBreakEven,
-              },
-              {
-                label: "손익분기점 매출",
-                value: result.breakEvenRevenue
-                  ? formatWon(result.breakEvenRevenue)
-                  : "계산 불가",
-              },
-              {
-                label: "예상 매출",
-                value: formatWon(result.expectedRevenue),
-              },
-              {
-                label: "예상 순이익",
-                value: formatWon(result.expectedNetProfit),
-                highlight: true,
-                valueClassName:
-                  result.expectedNetProfit >= 0
-                    ? calculatorHighlightClass
-                    : "text-amber-700",
-              },
-              {
-                label: "기여이익률",
-                value: formatPercent(result.contributionMarginRate),
-                highlight: true,
-              },
-            ]}
+            items={resultItems}
+            shareContext="손익분기점 계산 결과"
+            showPdf
+            pdfTitle="손익분기점 계산 결과"
+            pdfSubtitle="사장만 손익분기점 계산기"
+            pdfFilename="손익분기점_계산결과"
+            pdfRows={pdfRows}
           />
 
           <BreakEvenChart result={result} />
@@ -414,8 +465,7 @@ export function BreakEvenCalculator() {
       }
       seo={
         <CalculatorFaq
-          title="손익분기점 계산 가이드"
-          description="손익분기점 개념과 계산 방법, 활용 팁을 정리했습니다. 궁금한 항목을 눌러 내용을 확인하세요."
+          description={BREAK_EVEN_GUIDE_DESCRIPTION}
           items={BREAK_EVEN_FAQ_ITEMS}
         />
       }

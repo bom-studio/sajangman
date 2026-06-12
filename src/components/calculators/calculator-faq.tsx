@@ -16,10 +16,14 @@ export interface CalculatorFaqItem {
   title: string
   paragraphs?: string[]
   content?: ReactNode
+  /** FAQPage JSON-LD용 plain-text 답변 (content 전용 항목에 사용) */
+  schemaAnswer?: string
 }
 
+export const CALCULATOR_GUIDE_TITLE = "계산기 가이드"
+
 export interface CalculatorFaqProps {
-  title: string
+  title?: string
   description?: string
   items: CalculatorFaqItem[]
   className?: string
@@ -49,7 +53,7 @@ function FaqItemBody({ item }: { item: CalculatorFaqItem }) {
 }
 
 export function CalculatorFaq({
-  title,
+  title = CALCULATOR_GUIDE_TITLE,
   description,
   items,
   className,

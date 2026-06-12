@@ -8,8 +8,10 @@ import { CalculatorInputCard } from "@/components/calculators/calculator-input-c
 import { CalculatorModeToggle } from "@/components/calculators/calculator-mode-toggle"
 import { CalculatorPageLayout } from "@/components/calculators/calculator-page-layout"
 import { CalculatorResultCard } from "@/components/calculators/calculator-result-card"
-import { calculatorHighlightClass } from "@/components/calculators/calculator-styles"
-import { WEEKLY_PAY_FAQ_ITEMS } from "@/lib/calculators/faq/weekly-pay-faq"
+import {
+  WEEKLY_PAY_FAQ_ITEMS,
+  WEEKLY_PAY_GUIDE_DESCRIPTION,
+} from "@/lib/calculators/faq/weekly-pay-faq"
 import { Input } from "@/components/ui/input"
 import {
   calculateDailyWeeklyPay,
@@ -21,7 +23,6 @@ import {
   DEFAULT_SIMPLE_INPUT,
   formatAmount,
   formatHours,
-  formatWorkDays,
   parseAmountInput,
   parsePositiveNumber,
   WEEKLY_HOLIDAY_MIN_HOURS,
@@ -45,8 +46,11 @@ export function WeeklyPayCalculator() {
   const [dailyHours, setDailyHours] = useState<DailyHours>(
     createDefaultDailyHours()
   )
+  const [submitted, setSubmitted] = useState(false)
 
   const result = useMemo(() => {
+    if (!submitted) return null
+
     if (mode === "simple") {
       return calculateSimpleWeeklyPay({
         hourlyWage,
@@ -59,9 +63,10 @@ export function WeeklyPayCalculator() {
       hourlyWage,
       dailyHours,
     })
-  }, [mode, hourlyWage, daysPerWeek, hoursPerDay, dailyHours])
+  }, [submitted, mode, hourlyWage, daysPerWeek, hoursPerDay, dailyHours])
 
   function handleCalculate() {
+    setSubmitted(true)
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
@@ -71,6 +76,7 @@ export function WeeklyPayCalculator() {
     setDaysPerWeek(DEFAULT_SIMPLE_INPUT.daysPerWeek)
     setHoursPerDay(DEFAULT_SIMPLE_INPUT.hoursPerDay)
     setDailyHours(createDefaultDailyHours())
+    setSubmitted(false)
   }
 
   function updateDailyHour(key: keyof DailyHours, value: number) {
@@ -179,67 +185,58 @@ export function WeeklyPayCalculator() {
       }
       result={
         <CalculatorResultCard
-          items={[
-            {
-              label: "주 총 근무시간",
-              value: formatHours(result.weeklyTotalHours),
-            },
-            {
-              label: "근무일수",
-              value: formatWorkDays(result.workDays),
-            },
-            {
-              label: "1일 평균 근무시간",
-              value: formatHours(result.averageHoursPerDay),
-            },
-            {
-              label: "주휴수당 지급 여부",
-              value: result.isHolidayPayEligible ? "지급 대상" : "비대상",
-              valueClassName: result.isHolidayPayEligible
-                ? calculatorHighlightClass
-                : "text-amber-700",
-            },
-            {
-              label: "주휴수당",
-              value: `${formatAmount(result.weeklyHolidayPay)}원`,
-              highlight: result.isHolidayPayEligible,
-            },
-            {
-              label: "주 근무급여",
-              value: `${formatAmount(result.weeklyWorkPay)}원`,
-            },
-            {
-              label: "예상 주급",
-              value: `${formatAmount(result.estimatedWeeklyPay)}원`,
-              highlight: true,
-            },
-          ]}
+          description="시급과 근무시간 기준 주휴수당·예상 주급입니다."
+          items={
+            result
+              ? [
+                  {
+                    label: "주 근무시간",
+                    value: formatHours(result.weeklyTotalHours),
+                  },
+                  {
+                    label: "시급",
+                    value: `${formatAmount(hourlyWage)}원`,
+                  },
+                  {
+                    label: "주휴수당",
+                    value: `${formatAmount(result.weeklyHolidayPay)}원`,
+                    highlight: result.isHolidayPayEligible,
+                  },
+                  {
+                    label: "예상 주급",
+                    value: `${formatAmount(result.estimatedWeeklyPay)}원`,
+                    highlight: true,
+                  },
+                ]
+              : undefined
+          }
           footer={
-            <div className="space-y-3 pt-2">
-              {!result.isHolidayPayEligible && (
-                <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950">
+            result ? (
+              <div className="space-y-3 pt-2">
+                {!result.isHolidayPayEligible && (
+                  <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950">
+                    <AlertCircle className="mt-0.5 size-4 shrink-0" />
+                    <p>
+                      주 총 근무시간이 {WEEKLY_HOLIDAY_MIN_HOURS}시간 미만이면
+                      주휴수당 지급 대상이 아닙니다.
+                    </p>
+                  </div>
+                )}
+                <div className="flex gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
                   <AlertCircle className="mt-0.5 size-4 shrink-0" />
                   <p>
-                    주 총 근무시간이 {WEEKLY_HOLIDAY_MIN_HOURS}시간 미만이면
-                    주휴수당 지급 대상이 아닙니다.
+                    실제 지급 여부는 근로계약 및 근로기준법 적용 여부에 따라
+                    달라질 수 있습니다.
                   </p>
                 </div>
-              )}
-              <div className="flex gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
-                <AlertCircle className="mt-0.5 size-4 shrink-0" />
-                <p>
-                  실제 지급 여부는 근로계약 및 근로기준법 적용 여부에 따라 달라질
-                  수 있습니다.
-                </p>
               </div>
-            </div>
+            ) : undefined
           }
         />
       }
       seo={
         <CalculatorFaq
-          title="주휴수당 계산 가이드"
-          description="주휴수당 지급 조건과 계산 방법을 정리했습니다. 궁금한 항목을 눌러 내용을 확인하세요."
+          description={WEEKLY_PAY_GUIDE_DESCRIPTION}
           items={WEEKLY_PAY_FAQ_ITEMS}
         />
       }

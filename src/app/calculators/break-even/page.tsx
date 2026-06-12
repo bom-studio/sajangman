@@ -2,7 +2,11 @@ import type { Metadata } from "next"
 
 import { BreakEvenCalculator } from "@/components/calculators/break-even-calculator"
 import { CalculatorHeader } from "@/components/calculators/calculator-header"
+import { CalculatorSeoSchemas } from "@/components/calculators/calculator-seo-schemas"
 import { SiteLayout } from "@/components/site-layout"
+import { getCalculatorSeoConfig } from "@/lib/calculators/seo/page-config"
+
+const SEO = getCalculatorSeoConfig("/calculators/break-even")
 
 export const metadata: Metadata = {
   title: "손익분기점 계산기 | 사장만",
@@ -22,6 +26,12 @@ export const metadata: Metadata = {
 export default function BreakEvenCalculatorPage() {
   return (
     <SiteLayout>
+      <CalculatorSeoSchemas
+        calculatorName={SEO.name}
+        calculatorHref={SEO.href}
+        faqItems={SEO.faqItems}
+        howTo={SEO.howTo}
+      />
       <CalculatorHeader
         title="손익분기점 계산기"
         description="고정비, 판매가격, 변동비를 입력하여 손익분기점과 예상 수익을 계산하세요."

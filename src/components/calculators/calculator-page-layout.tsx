@@ -1,6 +1,7 @@
 import type { ReactNode, RefObject } from "react"
 
 import { RelatedCalculators } from "@/components/calculators/related-calculators"
+import { RelatedResourceGuides } from "@/components/resources/related-resource-guides"
 import { cn } from "@/lib/utils"
 
 interface CalculatorPageLayoutProps {
@@ -46,6 +47,7 @@ export function CalculatorPageLayout({
 
       {seo}
 
+      <RelatedResourceGuides calculatorHref={excludeHref} className="mt-16" />
       <RelatedCalculators excludeHref={excludeHref} className="mt-16" />
     </div>
   )

@@ -1,5 +1,8 @@
 import type { CalculatorFaqItem } from "@/components/calculators/calculator-faq"
 
+export const DELIVERY_MARGIN_GUIDE_DESCRIPTION =
+  "배달앱 수수료 구조, 플랫폼별 마진 비교, 배달 마진 개선 방법, 원가율 관리 등 배달 음식점 사장님을 위한 실전 가이드입니다."
+
 export const DELIVERY_MARGIN_FAQ_ITEMS: CalculatorFaqItem[] = [
   {
     title: "배달앱 수수료란?",

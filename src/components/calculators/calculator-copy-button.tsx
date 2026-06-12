@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Copy } from "lucide-react"
+import { Share2 } from "lucide-react"
 
 import { EstimateToast } from "@/components/estimate/estimate-toast"
 import { Button } from "@/components/ui/button"
@@ -18,16 +18,30 @@ export function buildResultCopyText(
   return lines.join("\n")
 }
 
+export function buildFriendlyShareText(
+  context: string,
+  items: CalculatorResultItem[]
+): string {
+  const lines = [context]
+  for (const item of items) {
+    lines.push(`${item.label} ${item.value}`)
+  }
+  lines.push("", "사장만 계산기")
+  return lines.join("\n")
+}
+
 interface CalculatorCopyButtonProps {
   items?: CalculatorResultItem[]
   text?: string
   title?: string
+  context?: string
 }
 
 export function CalculatorCopyButton({
   items,
   text,
   title,
+  context,
 }: CalculatorCopyButtonProps) {
   const [toast, setToast] = useState(false)
 
@@ -39,7 +53,12 @@ export function CalculatorCopyButton({
 
   async function handleCopy() {
     const content =
-      text ?? (items ? buildResultCopyText(items, title) : "")
+      text ??
+      (context && items
+        ? buildFriendlyShareText(context, items)
+        : items
+          ? buildResultCopyText(items, title)
+          : "")
 
     if (!content) return
 
@@ -54,8 +73,8 @@ export function CalculatorCopyButton({
   return (
     <>
       <Button type="button" variant="outline" size="sm" onClick={handleCopy}>
-        <Copy className="size-4" />
-        결과 복사
+        <Share2 className="size-4" />
+        결과 공유
       </Button>
       {toast && (
         <EstimateToast
