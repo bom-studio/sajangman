@@ -6,8 +6,7 @@ import { Calendar, ChevronLeft, Clock } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { ResourceArticleBody } from "@/components/resources/resource-article-body"
 import { ResourceArticleSchemas } from "@/components/resources/resource-article-schemas"
-import { ResourceRelatedArticles } from "@/components/resources/resource-related-articles"
-import { ResourceRelatedCalculator } from "@/components/resources/resource-related-calculator"
+import { ResourceDetailRelatedSections } from "@/components/resources/resource-detail-related-sections"
 import { ResourceTableOfContents } from "@/components/resources/resource-table-of-contents"
 import { SiteLayout } from "@/components/site-layout"
 import {
@@ -16,12 +15,15 @@ import {
 } from "@/data/resources/categories"
 import {
   getAllResourceArticles,
-  getRelatedResourceArticles,
   getResourceArticleBySlug,
 } from "@/data/resources"
-import { buildResourceOpenGraph } from "@/lib/resources/schema"
-import { estimateReadingMinutes } from "@/lib/resources/utils"
-import { SITE_NAME } from "@/lib/site-config"
+import { getResourceSectionsFromContent } from "@/data/resource-content"
+import {
+  getMappedRelatedAiTools,
+  getMappedRelatedCalculators,
+  getMappedRelatedResources,
+} from "@/lib/resources/related"
+import { buildResourceArticleMetadata } from "@/lib/resources/metadata"
 import { cn } from "@/lib/utils"
 
 interface ResourceDetailPageProps {
@@ -46,24 +48,7 @@ export async function generateMetadata({
     }
   }
 
-  const og = buildResourceOpenGraph(article)
-
-  return {
-    title: `${article.title} | ${SITE_NAME}`,
-    description: article.description,
-    openGraph: {
-      title: og.title,
-      description: og.description,
-      url: og.url,
-      type: og.type,
-      publishedTime: og.publishedTime,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: og.title,
-      description: og.description,
-    },
-  }
+  return buildResourceArticleMetadata(article)
 }
 
 function formatPublishedDate(date: string): string {
@@ -86,8 +71,12 @@ export default async function ResourceDetailPage({
   }
 
   const category = RESOURCE_CATEGORY_MAP[article.category]
-  const readingMinutes = estimateReadingMinutes(article)
-  const relatedArticles = getRelatedResourceArticles(article, 3)
+  const readingMinutes = article.readTime
+  const sections =
+    getResourceSectionsFromContent(slug) ?? article.sections
+  const relatedCalculators = getMappedRelatedCalculators(slug)
+  const relatedResources = getMappedRelatedResources(slug)
+  const relatedAiTools = getMappedRelatedAiTools(slug)
 
   return (
     <SiteLayout>
@@ -126,16 +115,19 @@ export default async function ResourceDetailPage({
 
         <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_240px]">
           <div className="min-w-0 space-y-10">
-            <ResourceRelatedCalculator calculatorHref={article.calculatorHref} />
-            <ResourceArticleBody sections={article.sections} />
+            <ResourceArticleBody sections={sections} />
           </div>
           <aside className="lg:sticky lg:top-24 lg:self-start">
-            <ResourceTableOfContents sections={article.sections} />
+            <ResourceTableOfContents sections={sections} />
           </aside>
         </div>
 
         <div className="mt-16">
-          <ResourceRelatedArticles articles={relatedArticles} />
+          <ResourceDetailRelatedSections
+            calculators={relatedCalculators}
+            resources={relatedResources}
+            aiTools={relatedAiTools}
+          />
         </div>
       </div>
     </SiteLayout>

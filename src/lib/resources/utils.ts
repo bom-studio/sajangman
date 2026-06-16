@@ -1,26 +1,20 @@
 import { CALCULATOR_REGISTRY } from "@/lib/calculators/registry"
 import type { ResourceArticle, ResourceArticleMeta } from "@/lib/resources/types"
 
-const KOREAN_READING_CHARS_PER_MINUTE = 500
-
-export function estimateReadingMinutes(article: ResourceArticle): number {
-  const text = article.sections
-    .flatMap((section) => [section.title, ...section.paragraphs])
-    .join("")
-
-  return Math.max(3, Math.ceil(text.length / KOREAN_READING_CHARS_PER_MINUTE))
-}
-
 export function toArticleMeta(article: ResourceArticle): ResourceArticleMeta {
   return {
+    id: article.id,
     slug: article.slug,
     title: article.title,
+    excerpt: article.excerpt,
     description: article.description,
     category: article.category,
+    readTime: article.readTime,
+    readingMinutes: article.readTime,
+    featured: article.featured,
     publishedAt: article.publishedAt,
     calculatorHref: article.calculatorHref,
     relatedSlugs: article.relatedSlugs,
-    readingMinutes: estimateReadingMinutes(article),
   }
 }
 

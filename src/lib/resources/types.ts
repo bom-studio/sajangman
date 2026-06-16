@@ -17,26 +17,31 @@ export interface ResourceSection {
 }
 
 export interface ResourceArticle {
+  id: string
   slug: string
   title: string
+  excerpt: string
   description: string
   category: ResourceCategoryId
+  readTime: number
+  featured: boolean
   publishedAt: string
   calculatorHref: string
   relatedSlugs: string[]
   sections: ResourceSection[]
 }
 
-export interface ResourceArticleMeta
-  extends Pick<
-    ResourceArticle,
-    | "slug"
-    | "title"
-    | "description"
-    | "category"
-    | "publishedAt"
-    | "calculatorHref"
-    | "relatedSlugs"
-  > {
+export interface ResourceArticleMeta {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  description: string
+  category: ResourceCategoryId
+  readTime: number
   readingMinutes: number
+  featured: boolean
+  publishedAt: string
+  calculatorHref: string
+  relatedSlugs: string[]
 }

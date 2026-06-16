@@ -7,13 +7,19 @@ import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
-const navItems = [
+import { AI_FEATURES_ENABLED } from "@/lib/features"
+
+const allNavItems = [
   { label: "홈", href: "/" },
   { label: "계산기", href: "/calculators" },
   { label: "문서작성", href: "/documents" },
   { label: "자료실", href: "/resources" },
   { label: "AI 생성기", href: "/ai" },
 ]
+
+const navItems = AI_FEATURES_ENABLED
+  ? allNavItems
+  : allNavItems.filter((item) => item.href !== "/ai")
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)

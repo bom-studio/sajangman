@@ -1,24 +1,17 @@
-import type { Metadata } from "next"
+import { AiToolPageGate } from "@/components/ai/AiToolPageGate"
+import { getAiToolById } from "@/data/ai/tools"
+import { AI_DISABLED_METADATA, buildAiToolMetadata } from "@/lib/ai/metadata"
+import { AI_FEATURES_ENABLED } from "@/lib/features"
 
-import { ComingSoon } from "@/components/coming-soon"
-import { PageHeader } from "@/components/page-header"
-import { SiteLayout } from "@/components/site-layout"
+const TOOL_ID = "review-reply"
 
-export const metadata: Metadata = {
-  title: "리뷰 답글 생성기 | 사장만",
-  description: "고객 리뷰에 맞는 친절한 답글을 생성합니다.",
+export function generateMetadata() {
+  if (!AI_FEATURES_ENABLED) return AI_DISABLED_METADATA
+  const tool = getAiToolById(TOOL_ID)
+  if (!tool) return {}
+  return buildAiToolMetadata(tool)
 }
 
 export default function ReviewReplyPage() {
-  return (
-    <SiteLayout>
-      <PageHeader
-        title="리뷰 답글 생성기"
-        description="고객 리뷰에 맞는 친절한 답글을 생성합니다."
-      />
-      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-        <ComingSoon />
-      </div>
-    </SiteLayout>
-  )
+  return <AiToolPageGate toolId={TOOL_ID} />
 }

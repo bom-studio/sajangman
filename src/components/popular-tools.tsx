@@ -7,6 +7,7 @@ import {
 } from "lucide-react"
 
 import { ToolCard, type ToolTag } from "@/components/tool-card"
+import { AI_FEATURES_ENABLED } from "@/lib/features"
 
 type PopularTool = {
   title: string
@@ -98,7 +99,7 @@ export function PopularTools() {
             사장님을 위한 실무 도구
           </h2>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-            계산기와 AI 도구로 매일 반복되는 업무를 더 빠르게 처리하세요.
+            계산기로 매일 반복되는 업무를 더 빠르게 처리하세요.
           </p>
         </div>
 
@@ -108,11 +109,13 @@ export function PopularTools() {
           tools={popularCalculators}
         />
 
-        <ToolSection
-          title="인기 AI 도구"
-          description="고객 응대와 콘텐츠 작성을 AI로 더 쉽게."
-          tools={popularAiTools}
-        />
+        {AI_FEATURES_ENABLED ? (
+          <ToolSection
+            title="인기 AI 도구"
+            description="고객 응대와 콘텐츠 작성을 AI로 더 쉽게."
+            tools={popularAiTools}
+          />
+        ) : null}
       </div>
     </section>
   )

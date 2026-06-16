@@ -27,6 +27,10 @@ export function getResourceArticlesByCalculatorHref(
   ).map(toArticleMeta)
 }
 
+export function getFeaturedResourceArticles(): ResourceArticleMeta[] {
+  return RESOURCE_ARTICLES.filter((article) => article.featured).map(toArticleMeta)
+}
+
 export function getRelatedResourceArticles(
   article: ResourceArticle,
   limit = 3

@@ -1,7 +1,24 @@
 import type { ResourceSection } from "@/lib/resources/types"
+import { renderInlineMarkdown } from "@/lib/resources/markdown"
 
 interface ResourceArticleBodyProps {
   sections: ResourceSection[]
+}
+
+function renderParagraph(paragraph: string) {
+  const lines = paragraph.split("\n")
+
+  return (
+    <div className="space-y-3">
+      {lines.map((line, index) => (
+        <p
+          key={index}
+          className="text-base leading-8 text-muted-foreground"
+          dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(line) }}
+        />
+      ))}
+    </div>
+  )
 }
 
 export function ResourceArticleBody({ sections }: ResourceArticleBodyProps) {
@@ -14,12 +31,7 @@ export function ResourceArticleBody({ sections }: ResourceArticleBodyProps) {
           </h2>
           <div className="mt-4 space-y-4">
             {section.paragraphs.map((paragraph, index) => (
-              <p
-                key={`${section.id}-${index}`}
-                className="text-base leading-8 text-muted-foreground"
-              >
-                {paragraph}
-              </p>
+              <div key={`${section.id}-${index}`}>{renderParagraph(paragraph)}</div>
             ))}
           </div>
         </section>

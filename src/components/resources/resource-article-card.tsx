@@ -45,7 +45,7 @@ export function ResourceArticleCard({
             {article.title}
           </h2>
           <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-            {article.description}
+            {article.excerpt}
           </p>
           <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary">
             자세히 보기

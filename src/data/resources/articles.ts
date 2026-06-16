@@ -1,12 +1,18 @@
 import type { ResourceArticle } from "@/lib/resources/types"
+import { NEW_RESOURCE_ARTICLES } from "@/data/resources/articles-new"
 
-export const RESOURCE_ARTICLES: ResourceArticle[] = [
+const LEGACY_RESOURCE_ARTICLES: ResourceArticle[] = [
   {
+    id: "res-001",
     slug: "weekly-pay-guide",
     title: "주휴수당 완벽 가이드",
+    excerpt:
+      "주휴수당 지급 요건, 계산 방법, 미지급 시 리스크까지 소상공인 사장님이 꼭 알아야 할 주휴수당 핵심을 정리했습니다.",
     description:
       "주휴수당 지급 요건, 계산 방법, 미지급 시 리스크까지 소상공인 사장님이 꼭 알아야 할 주휴수당 핵심을 정리했습니다.",
     category: "labor",
+    readTime: 6,
+    featured: true,
     publishedAt: "2026-06-01",
     calculatorHref: "/calculators/weekly-pay",
     relatedSlugs: [
@@ -58,11 +64,16 @@ export const RESOURCE_ARTICLES: ResourceArticle[] = [
     ],
   },
   {
+    id: "res-002",
     slug: "vat-filing-guide",
     title: "부가세 신고 방법",
+    excerpt:
+      "부가가치세 신고 기한, 홈택스 신고 절차, 매입·매출 공제 항목까지 소상공인을 위한 부가세 신고 실무 가이드입니다.",
     description:
       "부가가치세 신고 기한, 홈택스 신고 절차, 매입·매출 공제 항목까지 소상공인을 위한 부가세 신고 실무 가이드입니다.",
     category: "tax",
+    readTime: 6,
+    featured: true,
     publishedAt: "2026-06-02",
     calculatorHref: "/calculators/vat",
     relatedSlugs: [
@@ -114,11 +125,16 @@ export const RESOURCE_ARTICLES: ResourceArticle[] = [
     ],
   },
   {
+    id: "res-003",
     slug: "simplified-vs-general-vat",
     title: "간이과세자 vs 일반과세자",
+    excerpt:
+      "간이과세와 일반과세의 차이, 전환 기준, 업종별 부담 비교를 통해 우리 가게에 맞는 과세 유형을 선택하는 방법을 안내합니다.",
     description:
       "간이과세와 일반과세의 차이, 전환 기준, 업종별 부담 비교를 통해 우리 가게에 맞는 과세 유형을 선택하는 방법을 안내합니다.",
     category: "tax",
+    readTime: 6,
+    featured: true,
     publishedAt: "2026-06-03",
     calculatorHref: "/calculators/vat",
     relatedSlugs: [
@@ -170,11 +186,16 @@ export const RESOURCE_ARTICLES: ResourceArticle[] = [
     ],
   },
   {
+    id: "res-004",
     slug: "delivery-app-fees-comparison",
     title: "배달앱 수수료 비교",
+    excerpt:
+      "배민·쿠팡이츠·요기요 등 배달 플랫폼 수수료 구조와 정산금 계산 방법, 마진 관리 전략을 정리했습니다.",
     description:
       "배민·쿠팡이츠·요기요 등 배달 플랫폼 수수료 구조와 정산금 계산 방법, 마진 관리 전략을 정리했습니다.",
     category: "delivery",
+    readTime: 6,
+    featured: true,
     publishedAt: "2026-06-04",
     calculatorHref: "/calculators/delivery-margin",
     relatedSlugs: [
@@ -226,11 +247,16 @@ export const RESOURCE_ARTICLES: ResourceArticle[] = [
     ],
   },
   {
+    id: "res-005",
     slug: "restaurant-cost-rate-management",
     title: "음식점 원가율 관리법",
+    excerpt:
+      "식자재 원가율 산정, 레시피 단가 관리, 목표 원가율 설정까지 음식점 수익성을 높이는 원가 관리 실무 가이드입니다.",
     description:
       "식자재 원가율 산정, 레시피 단가 관리, 목표 원가율 설정까지 음식점 수익성을 높이는 원가 관리 실무 가이드입니다.",
     category: "sales",
+    readTime: 6,
+    featured: true,
     publishedAt: "2026-06-05",
     calculatorHref: "/calculators/cost-rate",
     relatedSlugs: [
@@ -282,11 +308,16 @@ export const RESOURCE_ARTICLES: ResourceArticle[] = [
     ],
   },
   {
+    id: "res-006",
     slug: "break-even-calculation-guide",
     title: "손익분기점 계산 방법",
+    excerpt:
+      "손익분기점(BEP)의 의미, 계산 공식, 음식점·소상공인 적용 사례와 창업 전 필수 점검 항목을 설명합니다.",
     description:
       "손익분기점(BEP)의 의미, 계산 공식, 음식점·소상공인 적용 사례와 창업 전 필수 점검 항목을 설명합니다.",
     category: "startup",
+    readTime: 5,
+    featured: true,
     publishedAt: "2026-06-06",
     calculatorHref: "/calculators/break-even",
     relatedSlugs: [
@@ -338,11 +369,16 @@ export const RESOURCE_ARTICLES: ResourceArticle[] = [
     ],
   },
   {
+    id: "res-007",
     slug: "employer-social-insurance-guide",
     title: "4대보험 사업주 부담금 정리",
+    excerpt:
+      "국민연금·건강보험·고용보험·산재보험의 사업주·근로자 부담 비율과 산정 기준, 소상공인 필수 체크 사항을 정리했습니다.",
     description:
       "국민연금·건강보험·고용보험·산재보험의 사업주·근로자 부담 비율과 산정 기준, 소상공인 필수 체크 사항을 정리했습니다.",
     category: "labor",
+    readTime: 6,
+    featured: false,
     publishedAt: "2026-06-07",
     calculatorHref: "/calculators/social-insurance",
     relatedSlugs: [
@@ -394,11 +430,16 @@ export const RESOURCE_ARTICLES: ResourceArticle[] = [
     ],
   },
   {
+    id: "res-008",
     slug: "severance-pay-guide",
     title: "퇴직금 계산 방법",
+    excerpt:
+      "퇴직금 지급 요건, 평균임금·근속기간 산정, 중간정산과 소상공인 사장님 체크리스트를 안내합니다.",
     description:
       "퇴직금 지급 요건, 평균임금·근속기간 산정, 중간정산과 소상공인 사장님 체크리스트를 안내합니다.",
     category: "labor",
+    readTime: 5,
+    featured: false,
     publishedAt: "2026-06-08",
     calculatorHref: "/calculators/severance-pay",
     relatedSlugs: [
@@ -450,11 +491,16 @@ export const RESOURCE_ARTICLES: ResourceArticle[] = [
     ],
   },
   {
+    id: "res-009",
     slug: "annual-leave-pay-guide",
     title: "연차수당 지급 기준",
+    excerpt:
+      "연차 발생 요건, 미사용 연차수당 계산, 소멸 시효와 소상공인 매장 적용 사례를 정리한 연차수당 실무 가이드입니다.",
     description:
       "연차 발생 요건, 미사용 연차수당 계산, 소멸 시효와 소상공인 매장 적용 사례를 정리한 연차수당 실무 가이드입니다.",
     category: "labor",
+    readTime: 5,
+    featured: false,
     publishedAt: "2026-06-09",
     calculatorHref: "/calculators/annual-leave-pay",
     relatedSlugs: [
@@ -506,11 +552,16 @@ export const RESOURCE_ARTICLES: ResourceArticle[] = [
     ],
   },
   {
+    id: "res-010",
     slug: "menu-pricing-strategy",
     title: "메뉴 가격 책정 전략",
+    excerpt:
+      "원가 기반 가격 산정, 경쟁사 비교, 심리 가격·배달 가격 차등 전략까지 음식점 메뉴 가격 설계 방법을 안내합니다.",
     description:
       "원가 기반 가격 산정, 경쟁사 비교, 심리 가격·배달 가격 차등 전략까지 음식점 메뉴 가격 설계 방법을 안내합니다.",
     category: "sales",
+    readTime: 6,
+    featured: false,
     publishedAt: "2026-06-10",
     calculatorHref: "/calculators/menu-price",
     relatedSlugs: [
@@ -561,4 +612,9 @@ export const RESOURCE_ARTICLES: ResourceArticle[] = [
       },
     ],
   },
+]
+
+export const RESOURCE_ARTICLES: ResourceArticle[] = [
+  ...LEGACY_RESOURCE_ARTICLES,
+  ...NEW_RESOURCE_ARTICLES,
 ]

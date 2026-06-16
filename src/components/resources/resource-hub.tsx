@@ -29,7 +29,7 @@ export function ResourceHub({ articles }: ResourceHubProps) {
       const matchesQuery =
         normalizedQuery.length === 0 ||
         article.title.toLowerCase().includes(normalizedQuery) ||
-        article.description.toLowerCase().includes(normalizedQuery)
+        article.excerpt.toLowerCase().includes(normalizedQuery)
 
       return matchesCategory && matchesQuery
     })
