@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { GoogleAnalytics } from "@next/third-parties/google"
 import { Inter } from "next/font/google"
+import Script from "next/script"
 
 import "./globals.css"
 import { cn } from "@/lib/utils"
@@ -12,6 +13,8 @@ const inter = Inter({
 
 /** GA4 측정 ID — .env.local 또는 Vercel Environment Variables에 설정 */
 const gaId = process.env.NEXT_PUBLIC_GA_ID
+
+const ADSENSE_CLIENT_ID = "ca-pub-2530285890343256"
 
 export const metadata: Metadata = {
   title: "사장만 | 사장님, 장사만 하세요.",
@@ -32,6 +35,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={cn("h-full antialiased", inter.variable)}>
+      <head>
+        <Script
+          id="adsense-init"
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className="min-h-full flex flex-col font-sans">
         {children}
         {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
