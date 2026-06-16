@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { GoogleAnalytics } from "@next/third-parties/google"
 import { Inter } from "next/font/google"
 
 import "./globals.css"
@@ -8,6 +9,9 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 })
+
+/** GA4 측정 ID — .env.local 또는 Vercel Environment Variables에 설정 */
+const gaId = process.env.NEXT_PUBLIC_GA_ID
 
 export const metadata: Metadata = {
   title: "사장만 | 사장님, 장사만 하세요.",
@@ -22,7 +26,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={cn("h-full antialiased", inter.variable)}>
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        {children}
+        {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
+      </body>
     </html>
   )
 }
