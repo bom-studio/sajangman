@@ -156,6 +156,15 @@ function runCleanups(cleanups: Array<() => void>): void {
   })
 }
 
+function shouldPreserveTransform(node: HTMLElement): boolean {
+  return (
+    node.tagName === "IMG" ||
+    node.dataset.sealImage === "true" ||
+    node.dataset.sealMark === "true" ||
+    node.closest("[data-seal-mark]") !== null
+  )
+}
+
 function prepareElementForCapture(element: HTMLElement): () => void {
   const cleanups: Array<() => void> = []
 
@@ -191,7 +200,7 @@ function prepareElementForCapture(element: HTMLElement): () => void {
       })
     }
 
-    if (computed.transform !== "none") {
+    if (computed.transform !== "none" && !shouldPreserveTransform(node)) {
       const previousTransform = node.style.transform
       node.style.transform = "none"
       cleanups.push(() => {
@@ -284,7 +293,9 @@ export async function downloadDocumentPdf(
 
           const computed = window.getComputedStyle(liveNode)
 
-          clonedNode.style.transform = "none"
+          if (!shouldPreserveTransform(clonedNode)) {
+            clonedNode.style.transform = "none"
+          }
           clonedNode.style.overflow = "visible"
           clonedNode.style.overflowX = "visible"
           clonedNode.style.overflowY = "visible"

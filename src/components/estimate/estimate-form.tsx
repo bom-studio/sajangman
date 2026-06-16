@@ -4,6 +4,7 @@ import { Plus, Trash2 } from "lucide-react"
 
 import { FormField } from "@/components/estimate/form-field"
 import { FormTextarea } from "@/components/estimate/form-textarea"
+import { SealControls } from "@/components/estimate/seal-signature"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -35,9 +36,16 @@ import { cn } from "@/lib/utils"
 interface EstimateFormProps {
   data: EstimateData
   onChange: (data: EstimateData) => void
+  sealUrl: string | null
+  onSealChange: (url: string | null) => void
 }
 
-export function EstimateForm({ data, onChange }: EstimateFormProps) {
+export function EstimateForm({
+  data,
+  onChange,
+  sealUrl,
+  onSealChange,
+}: EstimateFormProps) {
   const totals = calculateEstimate(data.items)
 
   function updateSupplier(
@@ -155,6 +163,13 @@ export function EstimateForm({ data, onChange }: EstimateFormProps) {
             placeholder="서울특별시 ..."
             className="sm:col-span-2"
           />
+          <div className="space-y-2 border-t border-border/60 pt-4 sm:col-span-2">
+            <p className="text-sm font-medium">회사 직인</p>
+            <p className="text-xs text-muted-foreground">
+              미리보기 공급자 정보의 대표자명 옆에 표시됩니다.
+            </p>
+            <SealControls sealUrl={sealUrl} onSealChange={onSealChange} />
+          </div>
         </CardContent>
       </Card>
 

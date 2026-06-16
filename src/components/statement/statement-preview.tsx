@@ -1,6 +1,6 @@
 "use client"
 
-import { SealUpload } from "@/components/estimate/seal-upload"
+import { SealSignature } from "@/components/estimate/seal-signature"
 import { Card, CardContent } from "@/components/ui/card"
 import { numberToKorean } from "@/lib/number-to-korean"
 import {
@@ -39,7 +39,6 @@ const DOC = {
 interface StatementPreviewProps {
   data: StatementData
   sealUrl: string | null
-  onSealChange: (url: string | null) => void
   className?: string
 }
 
@@ -67,7 +66,6 @@ function PreviewField({
 export function StatementPreview({
   data,
   sealUrl,
-  onSealChange,
   className,
 }: StatementPreviewProps) {
   const totals = calculateStatement(data.items)
@@ -171,7 +169,7 @@ export function StatementPreview({
             </div>
 
             <div
-              className="flex-1 space-y-2 rounded-lg border p-4"
+              className="flex-1 space-y-2.5 overflow-visible rounded-lg border p-4 pr-5"
               style={{
                 borderColor: DOC.border,
                 backgroundColor: DOC.bgMutedSoft,
@@ -184,9 +182,11 @@ export function StatementPreview({
                 공급자
               </p>
               <PreviewField label="상호명" value={data.supplier.companyName} />
-              <PreviewField
-                label="대표자"
-                value={data.supplier.representative}
+              <SealSignature
+                representativeName={data.supplier.representative}
+                sealUrl={sealUrl}
+                labelColor={DOC.textMuted}
+                textColor={DOC.text}
               />
               <PreviewField
                 label="사업자번호"
@@ -195,16 +195,6 @@ export function StatementPreview({
               <PreviewField label="전화" value={formattedSupplierPhone} />
               <PreviewField label="이메일" value={data.supplier.email} />
               <PreviewField label="주소" value={data.supplier.address} />
-              {!data.supplier.companyName &&
-                !data.supplier.representative &&
-                !formattedBusinessNumber &&
-                !formattedSupplierPhone &&
-                !data.supplier.email &&
-                !data.supplier.address && (
-                  <p className="text-sm" style={{ color: DOC.textLight }}>
-                    -
-                  </p>
-                )}
             </div>
           </div>
 
@@ -404,19 +394,6 @@ export function StatementPreview({
               )}
             </div>
           )}
-
-          <div
-            className="mt-6 flex items-center justify-between gap-4 border-t pt-6"
-            style={{ borderColor: DOC.borderLight }}
-          >
-            <p className="text-sm font-medium" style={{ color: DOC.text }}>
-              공급자:{" "}
-              <span className="font-semibold">
-                {data.supplier.companyName || "(상호명)"}
-              </span>
-            </p>
-            <SealUpload sealUrl={sealUrl} onSealChange={onSealChange} />
-          </div>
         </div>
       </CardContent>
     </Card>

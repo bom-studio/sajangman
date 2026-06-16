@@ -1,6 +1,6 @@
 "use client"
 
-import { SealUpload } from "@/components/estimate/seal-upload"
+import { SealSignature } from "@/components/estimate/seal-signature"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   calculateEstimate,
@@ -39,7 +39,6 @@ const DOC = {
 interface EstimatePreviewProps {
   data: EstimateData
   sealUrl: string | null
-  onSealChange: (url: string | null) => void
   className?: string
 }
 
@@ -99,7 +98,6 @@ function RemarksSection({ data }: { data: EstimateData }) {
 export function EstimatePreview({
   data,
   sealUrl,
-  onSealChange,
   className,
 }: EstimatePreviewProps) {
   const totals = calculateEstimate(data.items)
@@ -190,7 +188,7 @@ export function EstimatePreview({
             </div>
 
             <div
-              className="flex-1 space-y-2 rounded-lg border p-4"
+              className="flex-1 space-y-2.5 overflow-visible rounded-lg border p-4 pr-5"
               style={{
                 borderColor: DOC.border,
                 backgroundColor: DOC.bgMutedSoft,
@@ -203,9 +201,11 @@ export function EstimatePreview({
                 공급자
               </p>
               <PreviewField label="상호" value={data.supplier.companyName} />
-              <PreviewField
-                label="대표자"
-                value={data.supplier.representative}
+              <SealSignature
+                representativeName={data.supplier.representative}
+                sealUrl={sealUrl}
+                labelColor={DOC.textMuted}
+                textColor={DOC.text}
               />
               <PreviewField
                 label="사업자번호"
@@ -214,16 +214,6 @@ export function EstimatePreview({
               <PreviewField label="전화" value={formattedPhone} />
               <PreviewField label="이메일" value={data.supplier.email} />
               <PreviewField label="주소" value={data.supplier.address} />
-              {!data.supplier.companyName &&
-                !data.supplier.representative &&
-                !formattedBusinessNumber &&
-                !formattedPhone &&
-                !data.supplier.email &&
-                !data.supplier.address && (
-                  <p className="text-sm" style={{ color: DOC.textLight }}>
-                    -
-                  </p>
-                )}
             </div>
           </div>
 
@@ -389,19 +379,6 @@ export function EstimatePreview({
           >
             위와 같이 견적합니다.
           </p>
-
-          <div
-            className="mt-6 flex items-center justify-between gap-4 border-t pt-6"
-            style={{ borderColor: DOC.borderLight }}
-          >
-            <p className="text-sm font-medium" style={{ color: DOC.text }}>
-              공급자:{" "}
-              <span className="font-semibold">
-                {data.supplier.companyName || "(상호명)"}
-              </span>
-            </p>
-            <SealUpload sealUrl={sealUrl} onSealChange={onSealChange} />
-          </div>
         </div>
       </CardContent>
     </Card>

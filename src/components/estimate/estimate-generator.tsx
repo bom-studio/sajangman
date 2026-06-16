@@ -100,7 +100,12 @@ export function EstimateGenerator() {
             <p className="mb-4 text-sm font-medium text-muted-foreground lg:hidden">
               입력 폼
             </p>
-            <EstimateForm data={data} onChange={setData} />
+            <EstimateForm
+              data={data}
+              onChange={setData}
+              sealUrl={sealUrl}
+              onSealChange={setSealUrl}
+            />
           </div>
 
           <div className="xl:w-[60%] xl:flex-1">
@@ -122,11 +127,7 @@ export function EstimateGenerator() {
                 {isDownloading ? "PDF 생성 중..." : "PDF 다운로드"}
               </Button>
             </div>
-            <EstimatePreview
-              data={data}
-              sealUrl={sealUrl}
-              onSealChange={setSealUrl}
-            />
+            <EstimatePreview data={data} sealUrl={sealUrl} />
           </div>
         </div>
       </div>
