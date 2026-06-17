@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { AlertCircle } from "lucide-react"
 
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
@@ -28,6 +28,7 @@ import {
   WEEKLY_HOLIDAY_MIN_HOURS,
   type DailyHours,
   type WeeklyPayCalculationMode,
+  type WeeklyPayResult,
 } from "@/lib/weekly-pay"
 
 const CALCULATION_MODES: { id: WeeklyPayCalculationMode; label: string }[] = [
@@ -46,27 +47,25 @@ export function WeeklyPayCalculator() {
   const [dailyHours, setDailyHours] = useState<DailyHours>(
     createDefaultDailyHours()
   )
-  const [submitted, setSubmitted] = useState(false)
-
-  const result = useMemo(() => {
-    if (!submitted) return null
-
-    if (mode === "simple") {
-      return calculateSimpleWeeklyPay({
-        hourlyWage,
-        daysPerWeek,
-        hoursPerDay,
-      })
-    }
-
-    return calculateDailyWeeklyPay({
-      hourlyWage,
-      dailyHours,
-    })
-  }, [submitted, mode, hourlyWage, daysPerWeek, hoursPerDay, dailyHours])
+  const [result, setResult] = useState<WeeklyPayResult | null>(null)
 
   function handleCalculate() {
-    setSubmitted(true)
+    if (mode === "simple") {
+      setResult(
+        calculateSimpleWeeklyPay({
+          hourlyWage,
+          daysPerWeek,
+          hoursPerDay,
+        })
+      )
+    } else {
+      setResult(
+        calculateDailyWeeklyPay({
+          hourlyWage,
+          dailyHours,
+        })
+      )
+    }
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
@@ -76,7 +75,7 @@ export function WeeklyPayCalculator() {
     setDaysPerWeek(DEFAULT_SIMPLE_INPUT.daysPerWeek)
     setHoursPerDay(DEFAULT_SIMPLE_INPUT.hoursPerDay)
     setDailyHours(createDefaultDailyHours())
-    setSubmitted(false)
+    setResult(null)
   }
 
   function updateDailyHour(key: keyof DailyHours, value: number) {

@@ -1,4 +1,5 @@
 import { RESOURCE_ARTICLES } from "@/data/resources/articles"
+import { CALCULATOR_GUIDE_SLUGS } from "@/data/resources/calculator-guides"
 import type { ResourceArticle, ResourceArticleMeta } from "@/lib/resources/types"
 import { toArticleMeta } from "@/lib/resources/utils"
 
@@ -22,6 +23,14 @@ export function getResourceArticleBySlug(
 export function getResourceArticlesByCalculatorHref(
   calculatorHref: string
 ): ResourceArticleMeta[] {
+  const guideSlugs = CALCULATOR_GUIDE_SLUGS[calculatorHref]
+  if (guideSlugs?.length) {
+    return guideSlugs
+      .map((slug) => getResourceArticleBySlug(slug))
+      .filter((article): article is ResourceArticle => Boolean(article))
+      .map(toArticleMeta)
+  }
+
   return RESOURCE_ARTICLES.filter(
     (article) => article.calculatorHref === calculatorHref
   ).map(toArticleMeta)

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { AlertCircle } from "lucide-react"
 
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
@@ -373,39 +373,18 @@ export function DeliveryMarginCalculator() {
   )
   const [selectedCompareApp, setSelectedCompareApp] =
     useState<DeliveryAppId | null>(null)
+  const [snapshot, setSnapshot] = useState<{
+    viewMode: ViewModeId
+    orderAmount: number
+    ownerDeliveryFee: number
+    ownerDiscount: number
+    allResults: AppComparisonResult[]
+    singleResult: DeliveryMarginResult | null
+  } | null>(null)
 
   const costRate = formatCostRate(cost, orderAmount)
 
-  const baseInput = useMemo(
-    () => ({
-      orderType,
-      salesTier,
-      orderAmount,
-      cost,
-      customerDeliveryFee,
-      ownerDeliveryFee,
-      ownerDiscount,
-    }),
-    [
-      orderType,
-      salesTier,
-      orderAmount,
-      cost,
-      customerDeliveryFee,
-      ownerDeliveryFee,
-      ownerDiscount,
-    ]
-  )
-
-  const allResults = useMemo(
-    () => compareAllDeliveryApps(baseInput),
-    [baseInput]
-  )
-
-  useEffect(() => {
-    logDeliveryMarginResults(allResults)
-  }, [allResults])
-
+  const allResults = snapshot?.allResults ?? []
   const bestResult = allResults[0]
   const secondResult = allResults[1]
   const profitDiff =
@@ -413,38 +392,56 @@ export function DeliveryMarginCalculator() {
       ? bestResult.result.netProfit - secondResult.result.netProfit
       : null
 
-  useEffect(() => {
-    if (viewMode !== "compare") return
-    if (
-      !selectedCompareApp ||
-      !allResults.some((item) => item.app === selectedCompareApp)
-    ) {
-      setSelectedCompareApp(bestResult?.app ?? null)
-    }
-  }, [allResults, bestResult?.app, selectedCompareApp, viewMode])
-
-  const singleResult = useMemo(() => {
-    if (viewMode === "compare") return null
-    return calculateDeliveryMargin({
-      ...baseInput,
-      app: viewMode as DeliveryAppId,
-    })
-  }, [baseInput, viewMode])
+  const snapshotViewMode = snapshot?.viewMode
+  const singleResult = snapshot?.singleResult ?? null
 
   const selectedCompareResult = allResults.find(
     (item) => item.app === selectedCompareApp
   )
 
   const displayResult =
-    viewMode === "compare"
+    snapshot && snapshotViewMode === "compare" && bestResult
       ? (selectedCompareResult?.result ?? bestResult.result)
-      : singleResult!
+      : singleResult
+
   const displayAppLabel =
-    viewMode === "compare"
+    snapshot && snapshotViewMode === "compare" && bestResult
       ? (selectedCompareResult?.label ?? bestResult.label)
-      : getAppLabel(viewMode as DeliveryAppId)
+      : snapshotViewMode && snapshotViewMode !== "compare"
+        ? getAppLabel(snapshotViewMode as DeliveryAppId)
+        : ""
 
   function handleCalculate() {
+    const baseInput = {
+      orderType,
+      salesTier,
+      orderAmount,
+      cost,
+      customerDeliveryFee,
+      ownerDeliveryFee,
+      ownerDiscount,
+    }
+    const computedAllResults = compareAllDeliveryApps(baseInput)
+    const computedSingleResult =
+      viewMode !== "compare"
+        ? calculateDeliveryMargin({
+            ...baseInput,
+            app: viewMode as DeliveryAppId,
+          })
+        : null
+
+    setSnapshot({
+      viewMode,
+      orderAmount,
+      ownerDeliveryFee,
+      ownerDiscount,
+      allResults: computedAllResults,
+      singleResult: computedSingleResult,
+    })
+    setSelectedCompareApp(
+      viewMode === "compare" ? (computedAllResults[0]?.app ?? null) : null
+    )
+    logDeliveryMarginResults(computedAllResults)
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
@@ -458,14 +455,20 @@ export function DeliveryMarginCalculator() {
     setOwnerDeliveryFee(DEFAULT_INPUTS.ownerDeliveryFee)
     setOwnerDiscount(DEFAULT_INPUTS.ownerDiscount)
     setSelectedCompareApp(null)
+    setSnapshot(null)
   }
 
   const summaryResult =
-    viewMode === "compare" ? bestResult.result : singleResult!
+    snapshot && snapshotViewMode === "compare" && bestResult
+      ? bestResult.result
+      : singleResult
+
   const summaryAppLabel =
-    viewMode === "compare"
+    snapshot && snapshotViewMode === "compare" && bestResult
       ? `🥇 ${bestResult.shortLabel}`
-      : getAppLabel(viewMode as DeliveryAppId)
+      : snapshotViewMode && snapshotViewMode !== "compare"
+        ? getAppLabel(snapshotViewMode as DeliveryAppId)
+        : ""
 
   return (
     <>
@@ -571,6 +574,7 @@ export function DeliveryMarginCalculator() {
           </CalculatorInputCard>
         }
         result={
+          snapshot && summaryResult && displayResult ? (
           <>
             <CalculatorResultCard
               copyText={buildCopyText(allResults)}
@@ -578,7 +582,7 @@ export function DeliveryMarginCalculator() {
               items={[
                 {
                   label:
-                    viewMode === "compare" ? "가장 유리한 앱" : "선택 앱",
+                    snapshotViewMode === "compare" ? "가장 유리한 앱" : "선택 앱",
                   value: summaryAppLabel,
                   highlight: true,
                 },
@@ -599,7 +603,7 @@ export function DeliveryMarginCalculator() {
                   value: `${formatPercent(summaryResult.marginRate)}%`,
                   highlight: true,
                 },
-                ...(viewMode === "compare" &&
+                ...(snapshotViewMode === "compare" &&
                 profitDiff !== null &&
                 profitDiff > 0
                   ? [
@@ -612,7 +616,7 @@ export function DeliveryMarginCalculator() {
               ]}
             />
 
-            {viewMode === "compare" ? (
+            {snapshotViewMode === "compare" ? (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-foreground">
                   비교 결과
@@ -631,16 +635,16 @@ export function DeliveryMarginCalculator() {
               </div>
             ) : (
               <SingleAppResultCard
-                appLabel={getAppLabel(viewMode as DeliveryAppId)}
+                appLabel={getAppLabel(snapshotViewMode as DeliveryAppId)}
                 result={singleResult!}
-                ownerDeliveryFee={ownerDeliveryFee}
-                ownerDiscount={ownerDiscount}
+                ownerDeliveryFee={snapshot.ownerDeliveryFee}
+                ownerDiscount={snapshot.ownerDiscount}
               />
             )}
 
             <FormulaCard
               appLabel={displayAppLabel}
-              orderAmount={orderAmount}
+              orderAmount={snapshot.orderAmount}
               result={displayResult}
             />
 
@@ -653,6 +657,9 @@ export function DeliveryMarginCalculator() {
               </div>
             </div>
           </>
+          ) : (
+            <CalculatorResultCard />
+          )
         }
         extensions={
           <Card className={cn("mt-10", calculatorCardClass)}>

@@ -48,6 +48,7 @@ import {
   formatWon,
   parseAmountInput,
   parsePositiveNumber,
+  type BreakEvenResult,
 } from "@/lib/calculators/break-even"
 import {
   BREAK_EVEN_FAQ_ITEMS,
@@ -305,18 +306,17 @@ export function BreakEvenCalculator() {
     DEFAULT_BREAK_EVEN_INPUT.expectedQuantity
   )
 
-  const result = useMemo(
-    () =>
+  const [result, setResult] = useState<BreakEvenResult | null>(null)
+
+  function handleCalculate() {
+    setResult(
       calculateBreakEven({
         fixedCost,
         sellingPrice,
         variableCost,
         expectedQuantity,
-      }),
-    [fixedCost, sellingPrice, variableCost, expectedQuantity]
-  )
-
-  function handleCalculate() {
+      })
+    )
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
@@ -325,73 +325,78 @@ export function BreakEvenCalculator() {
     setSellingPrice(DEFAULT_BREAK_EVEN_INPUT.sellingPrice)
     setVariableCost(DEFAULT_BREAK_EVEN_INPUT.variableCost)
     setExpectedQuantity(DEFAULT_BREAK_EVEN_INPUT.expectedQuantity)
+    setResult(null)
   }
 
   const breakEvenWarning =
-    !result.canBreakEven && result.sellingPrice > 0
+    result && !result.canBreakEven && result.sellingPrice > 0
       ? "판매가가 변동비보다 커야 손익분기점을 계산할 수 있습니다."
       : null
 
   const bepStatus =
-    result.canBreakEven && result.breakEvenQuantity !== null
+    result?.canBreakEven && result.breakEvenQuantity !== null
       ? getBreakEvenQuantityStatus(result.breakEvenQuantity)
       : undefined
 
-  const resultItems = [
-    {
-      label: "손익분기점 판매수량",
-      description: "손익분기를 넘기기 위해 필요한 최소 판매 수량",
-      value: result.canBreakEven
-        ? formatQuantity(result.breakEvenQuantity!)
-        : "계산 불가",
-      highlight: result.canBreakEven,
-      status: bepStatus,
-    },
-    {
-      label: "손익분기점 매출",
-      value: result.breakEvenRevenue
-        ? formatWon(result.breakEvenRevenue)
-        : "계산 불가",
-      highlight: result.canBreakEven,
-    },
-    {
-      label: "예상 순이익",
-      value: formatWon(result.expectedNetProfit),
-      highlight: true,
-      valueClassName:
-        result.expectedNetProfit >= 0
-          ? calculatorHighlightClass
-          : "text-amber-700",
-    },
-    {
-      label: "기여이익률",
-      value: formatPercent(result.contributionMarginRate),
-      highlight: true,
-    },
-  ]
+  const resultItems = result
+    ? [
+        {
+          label: "손익분기점 판매수량",
+          description: "손익분기를 넘기기 위해 필요한 최소 판매 수량",
+          value: result.canBreakEven
+            ? formatQuantity(result.breakEvenQuantity!)
+            : "계산 불가",
+          highlight: result.canBreakEven,
+          status: bepStatus,
+        },
+        {
+          label: "손익분기점 매출",
+          value: result.breakEvenRevenue
+            ? formatWon(result.breakEvenRevenue)
+            : "계산 불가",
+          highlight: result.canBreakEven,
+        },
+        {
+          label: "예상 순이익",
+          value: formatWon(result.expectedNetProfit),
+          highlight: true,
+          valueClassName:
+            result.expectedNetProfit >= 0
+              ? calculatorHighlightClass
+              : "text-amber-700",
+        },
+        {
+          label: "기여이익률",
+          value: formatPercent(result.contributionMarginRate),
+          highlight: true,
+        },
+      ]
+    : undefined
 
-  const pdfRows = [
-    { label: "월 고정비", value: formatWon(result.fixedCost) },
-    { label: "판매가", value: formatWon(result.sellingPrice) },
-    { label: "변동비", value: formatWon(result.variableCost) },
-    {
-      label: "손익분기점 판매수량",
-      value: result.canBreakEven
-        ? formatQuantity(result.breakEvenQuantity!)
-        : "계산 불가",
-    },
-    {
-      label: "손익분기점 매출",
-      value: result.breakEvenRevenue
-        ? formatWon(result.breakEvenRevenue)
-        : "계산 불가",
-    },
-    { label: "예상 순이익", value: formatWon(result.expectedNetProfit) },
-    {
-      label: "기여이익률",
-      value: formatPercent(result.contributionMarginRate),
-    },
-  ]
+  const pdfRows = result
+    ? [
+        { label: "월 고정비", value: formatWon(result.fixedCost) },
+        { label: "판매가", value: formatWon(result.sellingPrice) },
+        { label: "변동비", value: formatWon(result.variableCost) },
+        {
+          label: "손익분기점 판매수량",
+          value: result.canBreakEven
+            ? formatQuantity(result.breakEvenQuantity!)
+            : "계산 불가",
+        },
+        {
+          label: "손익분기점 매출",
+          value: result.breakEvenRevenue
+            ? formatWon(result.breakEvenRevenue)
+            : "계산 불가",
+        },
+        { label: "예상 순이익", value: formatWon(result.expectedNetProfit) },
+        {
+          label: "기여이익률",
+          value: formatPercent(result.contributionMarginRate),
+        },
+      ]
+    : []
 
   return (
     <CalculatorPageLayout
@@ -459,8 +464,8 @@ export function BreakEvenCalculator() {
             pdfRows={pdfRows}
           />
 
-          <BreakEvenChart result={result} />
-          <BreakEvenDetailCard result={result} />
+          {result && <BreakEvenChart result={result} />}
+          {result && <BreakEvenDetailCard result={result} />}
         </>
       }
       seo={

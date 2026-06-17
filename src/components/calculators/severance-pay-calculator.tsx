@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
 import { CalculatorInputCard } from "@/components/calculators/calculator-input-card"
@@ -58,24 +58,25 @@ export function SeverancePayCalculator() {
   const [avgMonthlyWage, setAvgMonthlyWage] = useState(
     DEFAULT_SEVERANCE_INPUT.avgMonthlyWage
   )
-  const [submitted, setSubmitted] = useState(false)
-
-  const result = useMemo(() => {
-    if (!submitted) return null
-    return calculateSeverancePay({ startDate, endDate, avgMonthlyWage })
-  }, [submitted, startDate, endDate, avgMonthlyWage])
-
-  const message = useMemo(() => {
-    if (!submitted) return null
-    if (!startDate || !endDate) return "입사일과 퇴사일을 입력해주세요."
-    if (new Date(endDate) < new Date(startDate))
-      return "퇴사일은 입사일 이후여야 합니다."
-    if (avgMonthlyWage <= 0) return "최근 3개월 평균 월급을 입력해주세요."
-    return null
-  }, [submitted, startDate, endDate, avgMonthlyWage])
+  const [result, setResult] = useState<ReturnType<
+    typeof calculateSeverancePay
+  > | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
 
   function handleCalculate() {
-    setSubmitted(true)
+    if (!startDate || !endDate) {
+      setResult(null)
+      setMessage("입사일과 퇴사일을 입력해주세요.")
+    } else if (new Date(endDate) < new Date(startDate)) {
+      setResult(null)
+      setMessage("퇴사일은 입사일 이후여야 합니다.")
+    } else if (avgMonthlyWage <= 0) {
+      setResult(null)
+      setMessage("최근 3개월 평균 월급을 입력해주세요.")
+    } else {
+      setResult(calculateSeverancePay({ startDate, endDate, avgMonthlyWage }))
+      setMessage(null)
+    }
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
@@ -83,7 +84,8 @@ export function SeverancePayCalculator() {
     setStartDate(DEFAULT_SEVERANCE_INPUT.startDate)
     setEndDate(DEFAULT_SEVERANCE_INPUT.endDate)
     setAvgMonthlyWage(DEFAULT_SEVERANCE_INPUT.avgMonthlyWage)
-    setSubmitted(false)
+    setResult(null)
+    setMessage(null)
   }
 
   return (

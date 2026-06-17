@@ -18,6 +18,7 @@ export interface ResultStatCardProps {
   valueClassName?: string
   className?: string
   status?: ResultStatus
+  statusLabel?: string
 }
 
 export function ResultStatCard({
@@ -29,6 +30,7 @@ export function ResultStatCard({
   valueClassName,
   className,
   status,
+  statusLabel,
 }: ResultStatCardProps) {
   return (
     <div
@@ -42,7 +44,9 @@ export function ResultStatCard({
     >
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">{label}</p>
-        {status && <ResultStatusBadge status={status} />}
+        {status && (
+          <ResultStatusBadge status={status} label={statusLabel} />
+        )}
       </div>
       <p
         className={cn(

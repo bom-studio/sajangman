@@ -12,7 +12,7 @@ export const NEW_RESOURCE_ARTICLES: ResourceArticle[] = [
     readTime: 6,
     featured: true,
     publishedAt: "2026-06-11",
-    calculatorHref: "/calculators/vat",
+    calculatorHref: "/calculators/income-tax",
     relatedSlugs: [
       "vat-filing-guide",
       "tax-invoice-issuance-guide",
@@ -174,7 +174,7 @@ export const NEW_RESOURCE_ARTICLES: ResourceArticle[] = [
     readTime: 6,
     featured: true,
     publishedAt: "2026-06-14",
-    calculatorHref: "/calculators/net-salary",
+    calculatorHref: "/calculators/minimum-wage",
     relatedSlugs: [
       "weekly-pay-guide",
       "overtime-pay-guide",

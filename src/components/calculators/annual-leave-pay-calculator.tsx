@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
 import { CalculatorInputCard } from "@/components/calculators/calculator-input-card"
@@ -29,29 +29,30 @@ export function AnnualLeavePayCalculator() {
   const [remainingDays, setRemainingDays] = useState(
     DEFAULT_ANNUAL_LEAVE_INPUT.remainingDays
   )
-  const [submitted, setSubmitted] = useState(false)
-
-  const result = useMemo(() => {
-    if (!submitted) return null
-    return calculateAnnualLeavePay({ dailyWage, remainingDays })
-  }, [submitted, dailyWage, remainingDays])
-
-  const message = useMemo(() => {
-    if (!submitted) return null
-    if (dailyWage <= 0) return "0보다 큰 일급을 입력해주세요."
-    if (remainingDays <= 0) return "0보다 큰 연차 일수를 입력해주세요."
-    return null
-  }, [submitted, dailyWage, remainingDays])
+  const [result, setResult] = useState<ReturnType<
+    typeof calculateAnnualLeavePay
+  > | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
 
   function handleCalculate() {
-    setSubmitted(true)
+    if (dailyWage <= 0) {
+      setResult(null)
+      setMessage("0보다 큰 일급을 입력해주세요.")
+    } else if (remainingDays <= 0) {
+      setResult(null)
+      setMessage("0보다 큰 연차 일수를 입력해주세요.")
+    } else {
+      setResult(calculateAnnualLeavePay({ dailyWage, remainingDays }))
+      setMessage(null)
+    }
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
   function handleReset() {
     setDailyWage(DEFAULT_ANNUAL_LEAVE_INPUT.dailyWage)
     setRemainingDays(DEFAULT_ANNUAL_LEAVE_INPUT.remainingDays)
-    setSubmitted(false)
+    setResult(null)
+    setMessage(null)
   }
 
   return (
