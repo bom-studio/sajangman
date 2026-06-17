@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 import { CalculatorDonutChart } from "@/components/calculators/calculator-donut-chart"
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
@@ -31,30 +31,30 @@ export function MenuPriceCalculator() {
   const [targetMarginRate, setTargetMarginRate] = useState(
     DEFAULT_MENU_PRICE_INPUT.targetMarginRate
   )
-  const [submitted, setSubmitted] = useState(false)
-
-  const result = useMemo(() => {
-    if (!submitted) return null
-    return calculateMenuPrice({ cost, targetMarginRate })
-  }, [submitted, cost, targetMarginRate])
-
-  const message = useMemo(() => {
-    if (!submitted) return null
-    if (cost <= 0) return "0보다 큰 원가를 입력해주세요."
-    if (targetMarginRate <= 0 || targetMarginRate >= 100)
-      return "목표 마진율은 0% 초과 100% 미만이어야 합니다."
-    return null
-  }, [submitted, cost, targetMarginRate])
+  const [result, setResult] = useState<ReturnType<
+    typeof calculateMenuPrice
+  > | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
 
   function handleCalculate() {
-    setSubmitted(true)
+    if (cost <= 0) {
+      setResult(null)
+      setMessage("0보다 큰 원가를 입력해주세요.")
+    } else if (targetMarginRate <= 0 || targetMarginRate >= 100) {
+      setResult(null)
+      setMessage("목표 마진율은 0% 초과 100% 미만이어야 합니다.")
+    } else {
+      setResult(calculateMenuPrice({ cost, targetMarginRate }))
+      setMessage(null)
+    }
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
   function handleReset() {
     setCost(DEFAULT_MENU_PRICE_INPUT.cost)
     setTargetMarginRate(DEFAULT_MENU_PRICE_INPUT.targetMarginRate)
-    setSubmitted(false)
+    setResult(null)
+    setMessage(null)
   }
 
   const costRateStatus = result

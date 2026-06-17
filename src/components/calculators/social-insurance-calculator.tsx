@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 import { CalculatorDonutChart } from "@/components/calculators/calculator-donut-chart"
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
@@ -168,27 +168,26 @@ export function SocialInsuranceCalculator() {
   const [monthlySalary, setMonthlySalary] = useState(
     DEFAULT_SOCIAL_INSURANCE_INPUT.monthlySalary
   )
-  const [submitted, setSubmitted] = useState(false)
-
-  const result = useMemo(() => {
-    if (!submitted) return null
-    return calculateSocialInsurance({ monthlySalary })
-  }, [submitted, monthlySalary])
-
-  const message = useMemo(() => {
-    if (!submitted) return null
-    if (monthlySalary <= 0) return "0보다 큰 월급을 입력해주세요."
-    return null
-  }, [submitted, monthlySalary])
+  const [result, setResult] = useState<ReturnType<
+    typeof calculateSocialInsurance
+  > | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
 
   function handleCalculate() {
-    setSubmitted(true)
+    if (monthlySalary <= 0) {
+      setResult(null)
+      setMessage("0보다 큰 월급을 입력해주세요.")
+    } else {
+      setResult(calculateSocialInsurance({ monthlySalary }))
+      setMessage(null)
+    }
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
   function handleReset() {
     setMonthlySalary(DEFAULT_SOCIAL_INSURANCE_INPUT.monthlySalary)
-    setSubmitted(false)
+    setResult(null)
+    setMessage(null)
   }
 
   return (

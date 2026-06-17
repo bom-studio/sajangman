@@ -120,7 +120,11 @@ export const RESOURCE_RELATED_MAPPINGS: Record<string, ResourceRelatedMapping> =
     aiToolIds: ["menu-description", "event-copy"],
   },
   "income-tax-filing-guide": {
-    calculatorHrefs: ["/calculators/vat", "/calculators/net-salary"],
+    calculatorHrefs: [
+      "/calculators/income-tax",
+      "/calculators/vat",
+      "/calculators/net-salary",
+    ],
     resourceSlugs: [
       "vat-filing-guide",
       "basic-bookkeeping-guide",
@@ -148,6 +152,7 @@ export const RESOURCE_RELATED_MAPPINGS: Record<string, ResourceRelatedMapping> =
   },
   "minimum-wage-2026-guide": {
     calculatorHrefs: [
+      "/calculators/minimum-wage",
       "/calculators/weekly-pay",
       "/calculators/net-salary",
     ],

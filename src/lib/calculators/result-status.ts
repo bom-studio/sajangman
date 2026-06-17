@@ -37,3 +37,42 @@ export function getBreakEvenQuantityStatus(quantity: number): ResultStatus {
   if (quantity < 300) return "medium"
   return "warning"
 }
+
+export function getMinimumWageComplianceStatus(
+  isCompliant: boolean
+): ResultStatus {
+  return isCompliant ? "good" : "warning"
+}
+
+export function getUnemploymentEligibilityStatus(
+  level: "eligible" | "uncertain" | "unlikely" | "ineligible"
+): ResultStatus {
+  switch (level) {
+    case "eligible":
+      return "good"
+    case "uncertain":
+      return "medium"
+    case "unlikely":
+    case "ineligible":
+      return "warning"
+  }
+}
+
+export const COUPON_RECOMMENDATION_LABEL: Record<ResultStatus, string> = {
+  good: "진행 추천",
+  medium: "주의",
+  warning: "비추천",
+}
+
+export function getCouponRecommendationStatus(
+  recommendation: "recommended" | "caution" | "not_recommended"
+): ResultStatus {
+  switch (recommendation) {
+    case "recommended":
+      return "good"
+    case "caution":
+      return "medium"
+    case "not_recommended":
+      return "warning"
+  }
+}

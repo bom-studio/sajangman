@@ -5,7 +5,13 @@ import {
 } from "@/lib/calculators/result-status"
 import { cn } from "@/lib/utils"
 
-export function ResultStatusBadge({ status }: { status: ResultStatus }) {
+export function ResultStatusBadge({
+  status,
+  label,
+}: {
+  status: ResultStatus
+  label?: string
+}) {
   return (
     <span
       className={cn(
@@ -13,7 +19,7 @@ export function ResultStatusBadge({ status }: { status: ResultStatus }) {
         RESULT_STATUS_BADGE_CLASS[status]
       )}
     >
-      {RESULT_STATUS_LABEL[status]}
+      {label ?? RESULT_STATUS_LABEL[status]}
     </span>
   )
 }

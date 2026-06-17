@@ -33,6 +33,7 @@ export interface CalculatorResultItem {
   description?: string
   className?: string
   status?: ResultStatus
+  statusLabel?: string
 }
 
 interface CalculatorResultCardProps {

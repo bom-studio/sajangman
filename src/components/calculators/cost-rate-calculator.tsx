@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 import { CalculatorDonutChart } from "@/components/calculators/calculator-donut-chart"
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
@@ -30,28 +30,27 @@ export function CostRateCalculator() {
     DEFAULT_COST_RATE_INPUT.sellingPrice
   )
   const [cost, setCost] = useState(DEFAULT_COST_RATE_INPUT.cost)
-  const [submitted, setSubmitted] = useState(false)
-
-  const result = useMemo(() => {
-    if (!submitted) return null
-    return calculateCostRate({ sellingPrice, cost })
-  }, [submitted, sellingPrice, cost])
-
-  const message = useMemo(() => {
-    if (!submitted) return null
-    if (sellingPrice <= 0) return "0보다 큰 판매가를 입력해주세요."
-    return null
-  }, [submitted, sellingPrice])
+  const [result, setResult] = useState<ReturnType<
+    typeof calculateCostRate
+  > | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
 
   function handleCalculate() {
-    setSubmitted(true)
+    if (sellingPrice <= 0) {
+      setResult(null)
+      setMessage("0보다 큰 판매가를 입력해주세요.")
+    } else {
+      setResult(calculateCostRate({ sellingPrice, cost }))
+      setMessage(null)
+    }
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
   function handleReset() {
     setSellingPrice(DEFAULT_COST_RATE_INPUT.sellingPrice)
     setCost(DEFAULT_COST_RATE_INPUT.cost)
-    setSubmitted(false)
+    setResult(null)
+    setMessage(null)
   }
 
   const costRateStatus = result ? getCostRateStatus(result.costRate) : undefined
