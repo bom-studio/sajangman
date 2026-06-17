@@ -1,26 +1,91 @@
 import type { MetadataRoute } from "next"
 
+import { CALCULATORS } from "@/data/calculators"
 import { getAllResourceArticles } from "@/data/resources"
 import { SITE_URL } from "@/lib/site-config"
 
-const STATIC_PATHS = [
-  "/",
-  "/calculators",
-  "/documents",
-  "/resources",
-] as const
+type ChangeFrequency = NonNullable<
+  MetadataRoute.Sitemap[number]["changeFrequency"]
+>
+
+interface SitemapPageConfig {
+  path: string
+  changeFrequency: ChangeFrequency
+  priority: number
+  lastModified?: Date | string
+}
+
+const DOCUMENT_PAGES: SitemapPageConfig[] = [
+  {
+    path: "/documents/estimate",
+    changeFrequency: "monthly",
+    priority: 0.8,
+  },
+  {
+    path: "/documents/statement",
+    changeFrequency: "monthly",
+    priority: 0.8,
+  },
+]
+
+const STATIC_PAGES: SitemapPageConfig[] = [
+  { path: "/", changeFrequency: "weekly", priority: 1 },
+  { path: "/calculators", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/documents", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/resources", changeFrequency: "weekly", priority: 0.9 },
+]
+
+function toAbsoluteUrl(path: string): string {
+  return path === "/" ? SITE_URL : `${SITE_URL}${path}`
+}
+
+function toSitemapEntry({
+  path,
+  changeFrequency,
+  priority,
+  lastModified,
+}: SitemapPageConfig): MetadataRoute.Sitemap[number] {
+  return {
+    url: toAbsoluteUrl(path),
+    lastModified: lastModified ?? new Date(),
+    changeFrequency,
+    priority,
+  }
+}
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
-    url: path === "/" ? SITE_URL : `${SITE_URL}${path}`,
-  }))
+  const builtAt = new Date()
+
+  const staticEntries = STATIC_PAGES.map((page) =>
+    toSitemapEntry({ ...page, lastModified: builtAt })
+  )
+
+  const calculatorEntries = CALCULATORS.map((calculator) =>
+    toSitemapEntry({
+      path: calculator.href,
+      changeFrequency: "monthly",
+      priority: 0.8,
+      lastModified: builtAt,
+    })
+  )
+
+  const documentEntries = DOCUMENT_PAGES.map((page) =>
+    toSitemapEntry({ ...page, lastModified: builtAt })
+  )
 
   const resourceEntries: MetadataRoute.Sitemap = getAllResourceArticles().map(
     (article) => ({
       url: `${SITE_URL}/resources/${article.slug}`,
       lastModified: article.publishedAt,
+      changeFrequency: "monthly",
+      priority: 0.7,
     })
   )
 
-  return [...staticEntries, ...resourceEntries]
+  return [
+    ...staticEntries,
+    ...calculatorEntries,
+    ...documentEntries,
+    ...resourceEntries,
+  ]
 }
