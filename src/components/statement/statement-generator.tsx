@@ -11,6 +11,7 @@ import { loadStoredSupplier, saveStoredSupplier } from "@/lib/estimate-storage"
 import {
   loadStoredBankAccount,
   saveStoredBankAccount,
+  saveStatementDraft,
 } from "@/lib/statement-storage"
 import {
   downloadStatementPdf,
@@ -60,7 +61,8 @@ export function StatementGenerator() {
     if (!hydrated) return
     saveStoredSupplier(data.supplier, sealUrl)
     saveStoredBankAccount(data.bankAccount)
-  }, [data.supplier, data.bankAccount, sealUrl, hydrated])
+    saveStatementDraft(data)
+  }, [data, sealUrl, hydrated])
 
   useEffect(() => {
     if (!toast) return
