@@ -10,7 +10,8 @@ import { TransactionConfirmationForm } from "@/components/transaction-confirmati
 import { TransactionConfirmationPreview } from "@/components/transaction-confirmation/transaction-confirmation-preview"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { loadStoredSupplier, saveStoredSupplier } from "@/lib/estimate-storage"
+import { saveStoredSupplier } from "@/lib/estimate-storage"
+import { loadInitialSupplier } from "@/lib/supplier-hydration"
 import {
   TRANSACTION_CONFIRMATION_FAQ_ITEMS,
   TRANSACTION_CONFIRMATION_GUIDE_DESCRIPTION,
@@ -46,7 +47,7 @@ const RELATED_CALCULATORS = [
 
 function applyStoredSupplier(
   data: TransactionConfirmationData,
-  stored: ReturnType<typeof loadStoredSupplier>
+  stored: Awaited<ReturnType<typeof loadInitialSupplier>>
 ): TransactionConfirmationData {
   if (!stored) return data
 
@@ -78,12 +79,24 @@ export function TransactionConfirmationGenerator() {
   const totals = calculateTransactionConfirmation(data.items)
 
   useEffect(() => {
-    const storedSupplier = loadStoredSupplier()
-    setData((prev) => applyStoredSupplier(prev, storedSupplier))
-    if (storedSupplier?.sealUrl) {
-      setSupplierSealUrl(storedSupplier.sealUrl)
+    let cancelled = false
+
+    async function hydrate() {
+      const storedSupplier = await loadInitialSupplier()
+      if (cancelled) return
+
+      setData((prev) => applyStoredSupplier(prev, storedSupplier))
+      if (storedSupplier?.sealUrl) {
+        setSupplierSealUrl(storedSupplier.sealUrl)
+      }
+      setHydrated(true)
     }
-    setHydrated(true)
+
+    hydrate()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -110,9 +123,11 @@ export function TransactionConfirmationGenerator() {
 
   function handleReset() {
     const fresh = getDefaultTransactionConfirmationData()
-    const storedSupplier = loadStoredSupplier()
-    setData(applyStoredSupplier(fresh, storedSupplier))
-    setSupplierSealUrl(storedSupplier?.sealUrl ?? null)
+    setData({
+      ...fresh,
+      supplier: data.supplier,
+    })
+    setSupplierSealUrl(supplierSealUrl)
   }
 
   function handlePrint() {

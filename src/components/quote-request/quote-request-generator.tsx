@@ -29,6 +29,7 @@ import {
   loadStoredQuoteRequester,
   saveStoredQuoteRequester,
 } from "@/lib/quote-request-storage"
+import { loadInitialRequester } from "@/lib/supplier-hydration"
 
 const RELATED_DOCUMENTS = [
   { title: "견적서 생성기", href: "/documents/estimate" },
@@ -47,7 +48,7 @@ const RELATED_CALCULATORS = [
 
 function applyStoredRequester(
   data: QuoteRequestData,
-  stored: ReturnType<typeof loadStoredQuoteRequester>
+  stored: Awaited<ReturnType<typeof loadInitialRequester>> | ReturnType<typeof loadStoredQuoteRequester>
 ): QuoteRequestData {
   if (!stored) return data
 
@@ -69,8 +70,21 @@ export function QuoteRequestGenerator() {
   const itemCount = data.items.filter((item) => item.name.trim()).length
 
   useEffect(() => {
-    setData((prev) => applyStoredRequester(prev, loadStoredQuoteRequester()))
-    setHydrated(true)
+    let cancelled = false
+
+    async function hydrate() {
+      const stored = (await loadInitialRequester()) ?? loadStoredQuoteRequester()
+      if (cancelled) return
+
+      setData((prev) => applyStoredRequester(prev, stored))
+      setHydrated(true)
+    }
+
+    hydrate()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -86,7 +100,10 @@ export function QuoteRequestGenerator() {
 
   function handleReset() {
     const fresh = getDefaultQuoteRequestData()
-    setData(applyStoredRequester(fresh, loadStoredQuoteRequester()))
+    setData({
+      ...fresh,
+      requester: data.requester,
+    })
   }
 
   function handlePrint() {

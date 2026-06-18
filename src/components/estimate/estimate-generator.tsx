@@ -13,7 +13,8 @@ import {
   getEstimateDocumentElement,
   getEstimatePdfFilename,
 } from "@/lib/estimate-pdf"
-import { loadStoredSupplier, saveStoredSupplier } from "@/lib/estimate-storage"
+import { saveStoredSupplier } from "@/lib/estimate-storage"
+import { loadInitialSupplier } from "@/lib/supplier-hydration"
 
 export function EstimateGenerator() {
   const [data, setData] = useState<EstimateData>(getDefaultEstimateData)
@@ -26,8 +27,15 @@ export function EstimateGenerator() {
   } | null>(null)
 
   useEffect(() => {
-    const stored = loadStoredSupplier()
-    if (stored) {
+    let cancelled = false
+
+    async function hydrateSupplier() {
+      const stored = await loadInitialSupplier()
+      if (cancelled || !stored) {
+        if (!cancelled) setHydrated(true)
+        return
+      }
+
       setData((prev) => ({
         ...prev,
         supplier: {
@@ -40,8 +48,14 @@ export function EstimateGenerator() {
         },
       }))
       setSealUrl(stored.sealUrl)
+      setHydrated(true)
     }
-    setHydrated(true)
+
+    hydrateSupplier()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {

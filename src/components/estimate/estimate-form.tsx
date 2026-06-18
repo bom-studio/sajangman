@@ -5,6 +5,7 @@ import { Plus, Trash2 } from "lucide-react"
 import { FormField } from "@/components/estimate/form-field"
 import { FormTextarea } from "@/components/estimate/form-textarea"
 import { SealControls } from "@/components/estimate/seal-signature"
+import { SupplierSectionHeader } from "@/components/documents/supplier-section-header"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -22,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { applyProfileToSupplierInfo } from "@/lib/apply-business-profile"
 import {
   calculateEstimate,
   createEmptyItem,
@@ -31,6 +33,7 @@ import {
   type EstimateData,
 } from "@/lib/estimate"
 import { formatBusinessNumber, formatPhoneNumber } from "@/lib/format-kr"
+import type { BusinessProfile } from "@/lib/supabase/business-profiles"
 import { cn } from "@/lib/utils"
 
 interface EstimateFormProps {
@@ -56,6 +59,16 @@ export function EstimateForm({
       ...data,
       supplier: { ...data.supplier, [field]: value },
     })
+  }
+
+  function handleSelectProfile(profile: BusinessProfile) {
+    onChange({
+      ...data,
+      supplier: applyProfileToSupplierInfo(data.supplier, profile),
+    })
+    if (profile.sealUrl) {
+      onSealChange(profile.sealUrl)
+    }
   }
 
   function updateCustomer(
@@ -114,12 +127,11 @@ export function EstimateForm({
   return (
     <div className="space-y-5">
       <Card className={cardClass}>
-        <CardHeader className={cardHeaderClass}>
-          <CardTitle>공급자 정보</CardTitle>
-          <CardDescription>
-            입력한 정보는 이 브라우저에 자동 저장됩니다.
-          </CardDescription>
-        </CardHeader>
+        <SupplierSectionHeader
+          className={cardHeaderClass}
+          description="입력한 정보는 이 브라우저에 자동 저장됩니다."
+          onSelectProfile={handleSelectProfile}
+        />
         <CardContent className={cn("grid gap-5 sm:grid-cols-2", cardContentClass)}>
           <FormField
             label="상호명"

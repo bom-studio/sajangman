@@ -7,6 +7,7 @@ import { calculatorSelectClassName } from "@/components/calculators/calculator-s
 import { FormField } from "@/components/estimate/form-field"
 import { FormTextarea } from "@/components/estimate/form-textarea"
 import { SealEditorDialog } from "@/components/estimate/seal-editor-dialog"
+import { SupplierSectionHeader } from "@/components/documents/supplier-section-header"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -25,6 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { formatBusinessNumber, formatPhoneNumber } from "@/lib/format-kr"
+import { applyProfileToSupplierInfo } from "@/lib/apply-business-profile"
 import {
   calculateReceipt,
   createEmptyReceiptItem,
@@ -40,6 +42,7 @@ import {
   type ReceiptPdfFormat,
   type VatMode,
 } from "@/lib/receipt"
+import type { BusinessProfile } from "@/lib/supabase/business-profiles"
 import { cn } from "@/lib/utils"
 
 interface ReceiptFormProps {
@@ -124,6 +127,16 @@ export function ReceiptForm({
     })
   }
 
+  function handleSelectProfile(profile: BusinessProfile) {
+    onChange({
+      ...data,
+      supplier: applyProfileToSupplierInfo(data.supplier, profile),
+    })
+    if (profile.sealUrl) {
+      onSealChange(profile.sealUrl)
+    }
+  }
+
   function updateRecipient(
     field: keyof ReceiptData["recipient"],
     value: string | boolean
@@ -195,12 +208,11 @@ export function ReceiptForm({
       </div>
 
       <Card className={cardClass}>
-        <CardHeader className={cardHeaderClass}>
-          <CardTitle>공급자 정보</CardTitle>
-          <CardDescription>
-            입력한 정보는 견적서 생성기와 동일하게 이 브라우저에 자동 저장됩니다.
-          </CardDescription>
-        </CardHeader>
+        <SupplierSectionHeader
+          className={cardHeaderClass}
+          description="입력한 정보는 견적서 생성기와 동일하게 이 브라우저에 자동 저장됩니다."
+          onSelectProfile={handleSelectProfile}
+        />
         <CardContent className={cn("grid gap-5 sm:grid-cols-2", cardContentClass)}>
           <FormField
             label="상호명"

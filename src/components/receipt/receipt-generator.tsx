@@ -18,7 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { loadStoredSupplier, saveStoredSupplier } from "@/lib/estimate-storage"
+import { saveStoredSupplier } from "@/lib/estimate-storage"
+import { loadInitialSupplier } from "@/lib/supplier-hydration"
 import {
   RECEIPT_FAQ_ITEMS,
   RECEIPT_GUIDE_DESCRIPTION,
@@ -58,7 +59,7 @@ const RELATED_CALCULATORS = [
 
 function applyStoredSupplier(
   data: ReceiptData,
-  stored: ReturnType<typeof loadStoredSupplier>
+  stored: Awaited<ReturnType<typeof loadInitialSupplier>>
 ): ReceiptData {
   if (!stored) return data
 
@@ -91,28 +92,40 @@ export function ReceiptGenerator() {
   const totals = calculateReceipt(data.items, data.receipt.vatMode)
 
   useEffect(() => {
-    const storedSupplier = loadStoredSupplier()
-    const prefs = loadReceiptPreferences()
+    let cancelled = false
 
-    setData((prev) => {
-      let next = applyStoredSupplier(prev, storedSupplier)
-      if (prefs) {
-        next = {
-          ...next,
-          receipt: {
-            ...next.receipt,
-            paymentMethod: prefs.paymentMethod,
-          },
-          remarks: prefs.remarks || next.remarks,
+    async function hydrate() {
+      const storedSupplier = await loadInitialSupplier()
+      const prefs = loadReceiptPreferences()
+
+      if (cancelled) return
+
+      setData((prev) => {
+        let next = applyStoredSupplier(prev, storedSupplier)
+        if (prefs) {
+          next = {
+            ...next,
+            receipt: {
+              ...next.receipt,
+              paymentMethod: prefs.paymentMethod,
+            },
+            remarks: prefs.remarks || next.remarks,
+          }
         }
-      }
-      return next
-    })
+        return next
+      })
 
-    if (storedSupplier?.sealUrl) {
-      setSealUrl(storedSupplier.sealUrl)
+      if (storedSupplier?.sealUrl) {
+        setSealUrl(storedSupplier.sealUrl)
+      }
+      setHydrated(true)
     }
-    setHydrated(true)
+
+    hydrate()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -144,7 +157,17 @@ export function ReceiptGenerator() {
 
   function performReset(keepSupplier: boolean) {
     const fresh = getDefaultReceiptData()
-    const storedSupplier = keepSupplier ? loadStoredSupplier() : null
+    const storedSupplier = keepSupplier
+      ? {
+          companyName: data.supplier.companyName,
+          representative: data.supplier.representative,
+          businessNumber: data.supplier.businessNumber,
+          phone: data.supplier.phone,
+          email: data.supplier.email,
+          address: data.supplier.address,
+          sealUrl,
+        }
+      : null
     const prefs = loadReceiptPreferences()
 
     let next = applyStoredSupplier(fresh, storedSupplier)

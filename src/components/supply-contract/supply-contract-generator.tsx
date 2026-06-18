@@ -18,7 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { loadStoredSupplier, saveStoredSupplier } from "@/lib/estimate-storage"
+import { saveStoredSupplier } from "@/lib/estimate-storage"
+import { loadInitialSupplier } from "@/lib/supplier-hydration"
 import {
   SUPPLY_CONTRACT_FAQ_ITEMS,
   SUPPLY_CONTRACT_GUIDE_DESCRIPTION,
@@ -57,7 +58,7 @@ const RELATED_CALCULATORS = [
 
 function applyStoredSupplier(
   data: SupplyContractData,
-  stored: ReturnType<typeof loadStoredSupplier>
+  stored: Awaited<ReturnType<typeof loadInitialSupplier>>
 ): SupplyContractData {
   if (!stored) return data
 
@@ -102,27 +103,39 @@ export function SupplyContractGenerator() {
   const totals = calculateSupplyContract(data.items)
 
   useEffect(() => {
-    const storedSupplier = loadStoredSupplier()
-    const storedBank = loadStoredBankAccount()
+    let cancelled = false
 
-    setData((prev) => {
-      let next = applyStoredSupplier(prev, storedSupplier)
-      if (storedBank && !next.paymentTerms.bankAccount) {
-        next = {
-          ...next,
-          paymentTerms: {
-            ...next.paymentTerms,
-            bankAccount: formatBankAccount(storedBank),
-          },
+    async function hydrate() {
+      const storedSupplier = await loadInitialSupplier()
+      const storedBank = loadStoredBankAccount()
+
+      if (cancelled) return
+
+      setData((prev) => {
+        let next = applyStoredSupplier(prev, storedSupplier)
+        if (storedBank && !next.paymentTerms.bankAccount) {
+          next = {
+            ...next,
+            paymentTerms: {
+              ...next.paymentTerms,
+              bankAccount: formatBankAccount(storedBank),
+            },
+          }
         }
-      }
-      return next
-    })
+        return next
+      })
 
-    if (storedSupplier?.sealUrl) {
-      setSupplierSealUrl(storedSupplier.sealUrl)
+      if (storedSupplier?.sealUrl) {
+        setSupplierSealUrl(storedSupplier.sealUrl)
+      }
+      setHydrated(true)
     }
-    setHydrated(true)
+
+    hydrate()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -158,10 +171,12 @@ export function SupplyContractGenerator() {
 
   function performReset(keepSupplier: boolean) {
     const fresh = getDefaultSupplyContractData()
-    const storedSupplier = keepSupplier ? loadStoredSupplier() : null
     const storedBank = loadStoredBankAccount()
 
-    let next = applyStoredSupplier(fresh, storedSupplier)
+    let next = keepSupplier
+      ? { ...fresh, supplier: data.supplier }
+      : fresh
+
     if (storedBank) {
       next = {
         ...next,
@@ -176,8 +191,6 @@ export function SupplyContractGenerator() {
     setBuyerSealUrl(null)
     if (!keepSupplier) {
       setSupplierSealUrl(null)
-    } else if (storedSupplier?.sealUrl) {
-      setSupplierSealUrl(storedSupplier.sealUrl)
     }
     setResetDialogOpen(false)
   }

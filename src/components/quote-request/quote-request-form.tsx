@@ -5,6 +5,7 @@ import { Plus, RotateCcw, Trash2, Upload } from "lucide-react"
 
 import { FormField } from "@/components/estimate/form-field"
 import { FormTextarea } from "@/components/estimate/form-textarea"
+import { SupplierSectionHeader } from "@/components/documents/supplier-section-header"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -23,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { formatPhoneNumber } from "@/lib/format-kr"
+import { applyProfileToQuoteRequestRequester } from "@/lib/apply-business-profile"
 import {
   ATTACHMENT_ACCEPT,
   createEmptyQuoteRequestItem,
@@ -38,6 +40,7 @@ import {
   type QuoteRequestRequester,
   type SelectionCriteria,
 } from "@/lib/quote-request"
+import type { BusinessProfile } from "@/lib/supabase/business-profiles"
 import { cn } from "@/lib/utils"
 
 interface QuoteRequestFormProps {
@@ -60,6 +63,13 @@ export function QuoteRequestForm({
     onChange({
       ...data,
       requester: { ...data.requester, [field]: value },
+    })
+  }
+
+  function handleSelectProfile(profile: BusinessProfile) {
+    onChange({
+      ...data,
+      requester: applyProfileToQuoteRequestRequester(data.requester, profile),
     })
   }
 
@@ -170,12 +180,12 @@ export function QuoteRequestForm({
       </div>
 
       <Card className={cardClass}>
-        <CardHeader className={cardHeaderClass}>
-          <CardTitle>요청자 정보</CardTitle>
-          <CardDescription>
-            입력한 정보는 이 브라우저에 자동 저장됩니다.
-          </CardDescription>
-        </CardHeader>
+        <SupplierSectionHeader
+          className={cardHeaderClass}
+          title="요청자 정보"
+          description="입력한 정보는 이 브라우저에 자동 저장됩니다."
+          onSelectProfile={handleSelectProfile}
+        />
         <CardContent className={cn("grid gap-5 sm:grid-cols-2", cardContentClass)}>
           <FormField
             label="회사명"

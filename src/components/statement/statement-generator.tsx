@@ -7,7 +7,8 @@ import { EstimateToast } from "@/components/estimate/estimate-toast"
 import { StatementForm } from "@/components/statement/statement-form"
 import { StatementPreview } from "@/components/statement/statement-preview"
 import { Button } from "@/components/ui/button"
-import { loadStoredSupplier, saveStoredSupplier } from "@/lib/estimate-storage"
+import { saveStoredSupplier } from "@/lib/estimate-storage"
+import { loadInitialSupplier } from "@/lib/supplier-hydration"
 import {
   loadStoredBankAccount,
   saveStoredBankAccount,
@@ -31,30 +32,42 @@ export function StatementGenerator() {
   } | null>(null)
 
   useEffect(() => {
-    const storedSupplier = loadStoredSupplier()
-    const storedBankAccount = loadStoredBankAccount()
+    let cancelled = false
 
-    setData((prev) => ({
-      ...prev,
-      ...(storedSupplier && {
-        supplier: {
-          companyName: storedSupplier.companyName,
-          representative: storedSupplier.representative,
-          businessNumber: storedSupplier.businessNumber,
-          phone: storedSupplier.phone,
-          email: storedSupplier.email,
-          address: storedSupplier.address,
-        },
-      }),
-      ...(storedBankAccount && {
-        bankAccount: storedBankAccount,
-      }),
-    }))
+    async function hydrate() {
+      const storedSupplier = await loadInitialSupplier()
+      const storedBankAccount = loadStoredBankAccount()
 
-    if (storedSupplier) {
-      setSealUrl(storedSupplier.sealUrl)
+      if (cancelled) return
+
+      setData((prev) => ({
+        ...prev,
+        ...(storedSupplier && {
+          supplier: {
+            companyName: storedSupplier.companyName,
+            representative: storedSupplier.representative,
+            businessNumber: storedSupplier.businessNumber,
+            phone: storedSupplier.phone,
+            email: storedSupplier.email,
+            address: storedSupplier.address,
+          },
+        }),
+        ...(storedBankAccount && {
+          bankAccount: storedBankAccount,
+        }),
+      }))
+
+      if (storedSupplier) {
+        setSealUrl(storedSupplier.sealUrl)
+      }
+      setHydrated(true)
     }
-    setHydrated(true)
+
+    hydrate()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {

@@ -10,7 +10,8 @@ import { PurchaseOrderForm } from "@/components/purchase-order/purchase-order-fo
 import { PurchaseOrderPreview } from "@/components/purchase-order/purchase-order-preview"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { loadStoredSupplier, saveStoredSupplier } from "@/lib/estimate-storage"
+import { saveStoredSupplier } from "@/lib/estimate-storage"
+import { loadInitialSupplier } from "@/lib/supplier-hydration"
 import {
   PURCHASE_ORDER_FAQ_ITEMS,
   PURCHASE_ORDER_GUIDE_DESCRIPTION,
@@ -54,7 +55,7 @@ const RELATED_DOCUMENTS = [
 
 function applyStoredSupplier(
   data: PurchaseOrderData,
-  stored: ReturnType<typeof loadStoredSupplier>
+  stored: Awaited<ReturnType<typeof loadInitialSupplier>>
 ): PurchaseOrderData {
   if (!stored) return data
 
@@ -84,8 +85,21 @@ export function PurchaseOrderGenerator() {
   const totals = calculatePurchaseOrder(data.items)
 
   useEffect(() => {
-    setData((prev) => applyStoredSupplier(prev, loadStoredSupplier()))
-    setHydrated(true)
+    let cancelled = false
+
+    async function hydrate() {
+      const stored = await loadInitialSupplier()
+      if (cancelled) return
+
+      setData((prev) => applyStoredSupplier(prev, stored))
+      setHydrated(true)
+    }
+
+    hydrate()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -112,7 +126,10 @@ export function PurchaseOrderGenerator() {
 
   function handleReset() {
     const fresh = getDefaultPurchaseOrderData()
-    setData(applyStoredSupplier(fresh, loadStoredSupplier()))
+    setData({
+      ...fresh,
+      supplier: data.supplier,
+    })
   }
 
   async function handlePdfDownload() {

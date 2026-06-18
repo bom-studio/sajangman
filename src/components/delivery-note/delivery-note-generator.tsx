@@ -23,7 +23,8 @@ import {
   getDeliveryNoteDocumentElement,
   getDeliveryNotePdfFilename,
 } from "@/lib/delivery-note-pdf"
-import { loadStoredSupplier, saveStoredSupplier } from "@/lib/estimate-storage"
+import { saveStoredSupplier } from "@/lib/estimate-storage"
+import { loadInitialSupplier } from "@/lib/supplier-hydration"
 import {
   DELIVERY_NOTE_FAQ_ITEMS,
   DELIVERY_NOTE_GUIDE_DESCRIPTION,
@@ -52,7 +53,7 @@ const RELATED_CALCULATORS = [
 
 function applyStoredSupplier(
   data: DeliveryNoteData,
-  stored: ReturnType<typeof loadStoredSupplier>
+  stored: Awaited<ReturnType<typeof loadInitialSupplier>>
 ): DeliveryNoteData {
   if (!stored) return data
 
@@ -83,12 +84,24 @@ export function DeliveryNoteGenerator() {
   const totals = calculateDeliveryNote(data.items)
 
   useEffect(() => {
-    const storedSupplier = loadStoredSupplier()
-    setData((prev) => applyStoredSupplier(prev, storedSupplier))
-    if (storedSupplier?.sealUrl) {
-      setSealUrl(storedSupplier.sealUrl)
+    let cancelled = false
+
+    async function hydrate() {
+      const storedSupplier = await loadInitialSupplier()
+      if (cancelled) return
+
+      setData((prev) => applyStoredSupplier(prev, storedSupplier))
+      if (storedSupplier?.sealUrl) {
+        setSealUrl(storedSupplier.sealUrl)
+      }
+      setHydrated(true)
     }
-    setHydrated(true)
+
+    hydrate()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -115,12 +128,13 @@ export function DeliveryNoteGenerator() {
 
   function handleReset() {
     const fresh = getDefaultDeliveryNoteData()
-    const storedSupplier = loadStoredSupplier()
-    setData(applyStoredSupplier(fresh, storedSupplier))
-    setSealUrl(storedSupplier?.sealUrl ?? null)
+    setData({
+      ...fresh,
+      supplier: data.supplier,
+    })
   }
 
-  function handleImportFromStatement() {
+  async function handleImportFromStatement() {
     const draft = loadStatementDraft()
     if (!draft) {
       setToast({
@@ -132,7 +146,8 @@ export function DeliveryNoteGenerator() {
     }
 
     const converted = convertStatementToDeliveryNote(draft)
-    setData(applyStoredSupplier(converted, loadStoredSupplier()))
+    const storedSupplier = await loadInitialSupplier()
+    setData(applyStoredSupplier(converted, storedSupplier))
     setToast({
       message: "거래명세서 데이터를 납품서로 불러왔습니다.",
       variant: "success",

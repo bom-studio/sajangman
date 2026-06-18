@@ -6,6 +6,7 @@ import { Plus, RotateCcw, Trash2 } from "lucide-react"
 import { FormField } from "@/components/estimate/form-field"
 import { FormTextarea } from "@/components/estimate/form-textarea"
 import { SealEditorDialog } from "@/components/estimate/seal-editor-dialog"
+import { SupplierSelectorButton } from "@/components/documents/supplier-selector-button"
 import {
   Accordion,
   AccordionContent,
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/table"
 import { calculatorSelectClassName } from "@/components/calculators/calculator-styles"
 import { formatBusinessNumber, formatPhoneNumber } from "@/lib/format-kr"
+import { applyProfileToContractParty } from "@/lib/apply-business-profile"
 import {
   calculateSupplyContract,
   createEmptySupplyContractItem,
@@ -43,6 +45,7 @@ import {
   type ShippingCostBearer,
   type SupplyContractData,
 } from "@/lib/supply-contract"
+import type { BusinessProfile } from "@/lib/supabase/business-profiles"
 import { cn } from "@/lib/utils"
 
 interface SupplyContractFormProps {
@@ -114,14 +117,21 @@ function PartyFields({
   title,
   party,
   onUpdate,
+  onSelectProfile,
 }: {
   title: string
   party: ContractParty
   onUpdate: (field: keyof ContractParty, value: string) => void
+  onSelectProfile?: (profile: BusinessProfile) => void
 }) {
   return (
     <div className="space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4">
-      <p className="text-sm font-semibold">{title}</p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-sm font-semibold">{title}</p>
+        {onSelectProfile ? (
+          <SupplierSelectorButton onSelect={onSelectProfile} />
+        ) : null}
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5 sm:col-span-2">
           <label className="text-sm font-medium">사업자 유형</label>
@@ -212,6 +222,16 @@ export function SupplyContractForm({
     onChange({ ...data, supplier: { ...data.supplier, [field]: value } })
   }
 
+  function handleSelectProfile(profile: BusinessProfile) {
+    onChange({
+      ...data,
+      supplier: applyProfileToContractParty(data.supplier, profile),
+    })
+    if (profile.sealUrl) {
+      onSupplierSealChange(profile.sealUrl)
+    }
+  }
+
   function updateBuyer(field: keyof ContractParty, value: string) {
     onChange({ ...data, buyer: { ...data.buyer, [field]: value } })
   }
@@ -264,6 +284,7 @@ export function SupplyContractForm({
               title="공급자"
               party={data.supplier}
               onUpdate={updateSupplier}
+              onSelectProfile={handleSelectProfile}
             />
             <PartyFields title="구매자" party={data.buyer} onUpdate={updateBuyer} />
           </AccordionContent>
