@@ -66,9 +66,7 @@ export function EstimateForm({
       ...data,
       supplier: applyProfileToSupplierInfo(data.supplier, profile),
     })
-    if (profile.sealUrl) {
-      onSealChange(profile.sealUrl)
-    }
+    onSealChange(profile.sealUrl ?? null)
   }
 
   function updateCustomer(

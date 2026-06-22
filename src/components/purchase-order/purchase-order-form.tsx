@@ -42,12 +42,16 @@ interface PurchaseOrderFormProps {
   data: PurchaseOrderData
   onChange: (data: PurchaseOrderData) => void
   onReset: () => void
+  sealUrl: string | null
+  onSealChange: (url: string | null) => void
 }
 
 export function PurchaseOrderForm({
   data,
   onChange,
   onReset,
+  sealUrl,
+  onSealChange,
 }: PurchaseOrderFormProps) {
   const totals = calculatePurchaseOrder(data.items)
 
@@ -66,6 +70,7 @@ export function PurchaseOrderForm({
       ...data,
       supplier: applyProfileToSupplierInfo(data.supplier, profile),
     })
+    onSealChange(profile.sealUrl ?? null)
   }
 
   function updateVendor(

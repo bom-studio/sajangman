@@ -227,9 +227,7 @@ export function SupplyContractForm({
       ...data,
       supplier: applyProfileToContractParty(data.supplier, profile),
     })
-    if (profile.sealUrl) {
-      onSupplierSealChange(profile.sealUrl)
-    }
+    onSupplierSealChange(profile.sealUrl ?? null)
   }
 
   function updateBuyer(field: keyof ContractParty, value: string) {

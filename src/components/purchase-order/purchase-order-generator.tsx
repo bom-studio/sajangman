@@ -1,15 +1,19 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
-import { Download, FileText, Receipt } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { FileText, Receipt } from "lucide-react"
 
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
+import { DocumentEditorActions } from "@/components/documents/document-editor-actions"
 import { EstimateToast } from "@/components/estimate/estimate-toast"
 import { PurchaseOrderForm } from "@/components/purchase-order/purchase-order-form"
 import { PurchaseOrderPreview } from "@/components/purchase-order/purchase-order-preview"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSavedDocumentLoader } from "@/hooks/use-saved-document-loader"
+import { buildSupplierSnapshot } from "@/lib/document-metadata"
+import { saveDocument } from "@/lib/documents"
 import { saveStoredSupplier } from "@/lib/estimate-storage"
 import { loadInitialSupplier } from "@/lib/supplier-hydration"
 import {
@@ -29,6 +33,7 @@ import {
   getPurchaseOrderDocumentElement,
   getPurchaseOrderPdfFilename,
 } from "@/lib/purchase-order-pdf"
+import type { SavedDocument } from "@/types/documents"
 
 const RELATED_DOCUMENTS = [
   {
@@ -74,7 +79,10 @@ function applyStoredSupplier(
 }
 
 export function PurchaseOrderGenerator() {
+  const searchParams = useSearchParams()
+  const docIdParam = searchParams.get("docId")
   const [data, setData] = useState<PurchaseOrderData>(getDefaultPurchaseOrderData)
+  const [sealUrl, setSealUrl] = useState<string | null>(null)
   const [isDownloading, setIsDownloading] = useState(false)
   const [hydrated, setHydrated] = useState(false)
   const [toast, setToast] = useState<{
@@ -84,7 +92,32 @@ export function PurchaseOrderGenerator() {
 
   const totals = calculatePurchaseOrder(data.items)
 
+  const applyLoadedDocument = useCallback((document: SavedDocument) => {
+    const payload = document.documentData as {
+      data?: PurchaseOrderData
+      sealUrl?: string | null
+    }
+
+    if (payload.data) {
+      setData(payload.data)
+    }
+
+    const nextSeal =
+      payload.sealUrl ??
+      (document.supplierSnapshot.sealUrl as string | null | undefined) ??
+      null
+    setSealUrl(nextSeal)
+    setHydrated(true)
+  }, [])
+
+  const { documentId, setDocumentId } = useSavedDocumentLoader({
+    documentType: "purchase_order",
+    onLoad: applyLoadedDocument,
+  })
+
   useEffect(() => {
+    if (docIdParam) return
+
     let cancelled = false
 
     async function hydrate() {
@@ -92,6 +125,7 @@ export function PurchaseOrderGenerator() {
       if (cancelled) return
 
       setData((prev) => applyStoredSupplier(prev, stored))
+      setSealUrl(stored?.sealUrl ?? null)
       setHydrated(true)
     }
 
@@ -100,7 +134,7 @@ export function PurchaseOrderGenerator() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [docIdParam])
 
   useEffect(() => {
     if (!hydrated) return
@@ -114,9 +148,9 @@ export function PurchaseOrderGenerator() {
         email: data.supplier.email,
         address: data.supplier.address,
       },
-      null
+      sealUrl
     )
-  }, [data.supplier, hydrated])
+  }, [data.supplier, sealUrl, hydrated])
 
   useEffect(() => {
     if (!toast) return
@@ -130,6 +164,33 @@ export function PurchaseOrderGenerator() {
       ...fresh,
       supplier: data.supplier,
     })
+  }
+
+  async function handleSave() {
+    const result = await saveDocument(
+      {
+        documentType: "purchase_order",
+        documentData: { data, sealUrl },
+        supplierSnapshot: buildSupplierSnapshot(
+          data.supplier as unknown as Record<string, unknown>,
+          sealUrl
+        ),
+        customerSnapshot: data.vendor as unknown as Record<string, unknown>,
+      },
+      documentId
+    )
+
+    if (result.error) {
+      setToast({ message: result.error, variant: "error" })
+      return { error: result.error }
+    }
+
+    if (result.data) {
+      setDocumentId(result.data.id)
+    }
+
+    setToast({ message: "문서가 저장되었습니다.", variant: "success" })
+    return { error: null }
   }
 
   async function handlePdfDownload() {
@@ -177,7 +238,7 @@ export function PurchaseOrderGenerator() {
 
   return (
     <>
-      <div className="mx-auto max-w-[1440px] px-4 py-8 pb-24 sm:px-6 lg:px-8 xl:pb-8">
+      <div className="mx-auto max-w-[1440px] px-4 py-8 pb-32 sm:px-6 lg:px-8 xl:pb-8">
         <div className="flex flex-col gap-8 xl:flex-row xl:items-start">
           <div className="xl:w-[40%] xl:shrink-0">
             <p className="mb-4 text-sm font-medium text-muted-foreground lg:hidden">
@@ -187,30 +248,29 @@ export function PurchaseOrderGenerator() {
               data={data}
               onChange={setData}
               onReset={handleReset}
+              sealUrl={sealUrl}
+              onSealChange={setSealUrl}
             />
           </div>
 
           <div className="xl:w-[60%] xl:flex-1">
             <div
               data-html2canvas-ignore="true"
-              className="mb-4 flex items-center justify-between gap-4"
+              className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
             >
               <p className="text-sm font-medium text-muted-foreground">
                 <span className="lg:hidden">미리보기</span>
                 <span className="hidden lg:inline">실시간 미리보기 (A4)</span>
               </p>
-              <Button
-                type="button"
-                onClick={handlePdfDownload}
-                disabled={isDownloading}
-                className="hidden xl:inline-flex"
-              >
-                <Download className="size-4" />
-                {isDownloading ? "PDF 생성 중..." : "PDF 다운로드"}
-              </Button>
+              <DocumentEditorActions
+                className="hidden xl:flex"
+                onSave={handleSave}
+                onPdfDownload={handlePdfDownload}
+                isPdfDownloading={isDownloading}
+              />
             </div>
 
-            <PurchaseOrderPreview data={data} />
+            <PurchaseOrderPreview data={data} sealUrl={sealUrl} />
 
             <Card
               data-html2canvas-ignore="true"
@@ -286,23 +346,23 @@ export function PurchaseOrderGenerator() {
         </div>
       </div>
 
-      <Button
-        type="button"
-        onClick={handlePdfDownload}
-        disabled={isDownloading}
-        size="lg"
+      <div
         data-html2canvas-ignore="true"
-        className="fixed bottom-6 right-6 z-50 shadow-lg xl:hidden"
+        className="fixed bottom-6 right-6 z-50 xl:hidden"
       >
-        <Download className="size-4" />
-        {isDownloading ? "PDF 생성 중..." : "PDF 다운로드"}
-      </Button>
+        <DocumentEditorActions
+          variant="mobile"
+          onSave={handleSave}
+          onPdfDownload={handlePdfDownload}
+          isPdfDownloading={isDownloading}
+        />
+      </div>
 
       {toast && (
         <EstimateToast
           message={toast.message}
           variant={toast.variant}
-          className="bottom-24 xl:bottom-6"
+          className="bottom-32 xl:bottom-6"
         />
       )}
     </>

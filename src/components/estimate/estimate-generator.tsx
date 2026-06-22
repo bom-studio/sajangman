@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Download } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 
+import { DocumentEditorActions } from "@/components/documents/document-editor-actions"
 import { EstimateForm } from "@/components/estimate/estimate-form"
 import { EstimatePreview } from "@/components/estimate/estimate-preview"
 import { EstimateToast } from "@/components/estimate/estimate-toast"
-import { Button } from "@/components/ui/button"
+import { useSavedDocumentLoader } from "@/hooks/use-saved-document-loader"
 import { getDefaultEstimateData, type EstimateData } from "@/lib/estimate"
 import {
   downloadEstimatePdf,
@@ -14,9 +15,14 @@ import {
   getEstimatePdfFilename,
 } from "@/lib/estimate-pdf"
 import { saveStoredSupplier } from "@/lib/estimate-storage"
+import { buildSupplierSnapshot } from "@/lib/document-metadata"
+import { saveDocument } from "@/lib/documents"
 import { loadInitialSupplier } from "@/lib/supplier-hydration"
+import type { SavedDocument } from "@/types/documents"
 
 export function EstimateGenerator() {
+  const searchParams = useSearchParams()
+  const docIdParam = searchParams.get("docId")
   const [data, setData] = useState<EstimateData>(getDefaultEstimateData)
   const [sealUrl, setSealUrl] = useState<string | null>(null)
   const [isDownloading, setIsDownloading] = useState(false)
@@ -26,28 +32,53 @@ export function EstimateGenerator() {
     variant: "error" | "success"
   } | null>(null)
 
+  const applyLoadedDocument = useCallback((document: SavedDocument) => {
+    const payload = document.documentData as {
+      data?: EstimateData
+      sealUrl?: string | null
+    }
+
+    if (payload.data) {
+      setData(payload.data)
+    }
+
+    const nextSeal =
+      payload.sealUrl ??
+      (document.supplierSnapshot.sealUrl as string | null | undefined) ??
+      null
+    setSealUrl(nextSeal)
+    setHydrated(true)
+  }, [])
+
+  const { documentId, setDocumentId } = useSavedDocumentLoader({
+    documentType: "estimate",
+    onLoad: applyLoadedDocument,
+  })
+
   useEffect(() => {
+    if (docIdParam) return
+
     let cancelled = false
 
     async function hydrateSupplier() {
       const stored = await loadInitialSupplier()
-      if (cancelled || !stored) {
-        if (!cancelled) setHydrated(true)
-        return
+      if (cancelled) return
+
+      if (stored) {
+        setData((prev) => ({
+          ...prev,
+          supplier: {
+            companyName: stored.companyName,
+            representative: stored.representative,
+            businessNumber: stored.businessNumber,
+            phone: stored.phone,
+            email: stored.email,
+            address: stored.address,
+          },
+        }))
+        setSealUrl(stored.sealUrl)
       }
 
-      setData((prev) => ({
-        ...prev,
-        supplier: {
-          companyName: stored.companyName,
-          representative: stored.representative,
-          businessNumber: stored.businessNumber,
-          phone: stored.phone,
-          email: stored.email,
-          address: stored.address,
-        },
-      }))
-      setSealUrl(stored.sealUrl)
       setHydrated(true)
     }
 
@@ -56,7 +87,7 @@ export function EstimateGenerator() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [docIdParam])
 
   useEffect(() => {
     if (!hydrated) return
@@ -68,6 +99,33 @@ export function EstimateGenerator() {
     const timer = setTimeout(() => setToast(null), 4000)
     return () => clearTimeout(timer)
   }, [toast])
+
+  async function handleSave() {
+    const result = await saveDocument(
+      {
+        documentType: "estimate",
+        documentData: { data, sealUrl },
+        supplierSnapshot: buildSupplierSnapshot(
+          data.supplier as unknown as Record<string, unknown>,
+          sealUrl
+        ),
+        customerSnapshot: data.customer as unknown as Record<string, unknown>,
+      },
+      documentId
+    )
+
+    if (result.error) {
+      setToast({ message: result.error, variant: "error" })
+      return { error: result.error }
+    }
+
+    if (result.data) {
+      setDocumentId(result.data.id)
+    }
+
+    setToast({ message: "문서가 저장되었습니다.", variant: "success" })
+    return { error: null }
+  }
 
   async function handlePdfDownload() {
     setIsDownloading(true)
@@ -108,7 +166,7 @@ export function EstimateGenerator() {
 
   return (
     <>
-      <div className="mx-auto max-w-[1440px] px-4 py-8 pb-24 sm:px-6 lg:px-8 xl:pb-8">
+      <div className="mx-auto max-w-[1440px] px-4 py-8 pb-32 sm:px-6 lg:px-8 xl:pb-8">
         <div className="flex flex-col gap-8 xl:flex-row xl:items-start">
           <div className="xl:w-[40%] xl:shrink-0">
             <p className="mb-4 text-sm font-medium text-muted-foreground lg:hidden">
@@ -125,44 +183,41 @@ export function EstimateGenerator() {
           <div className="xl:w-[60%] xl:flex-1">
             <div
               data-html2canvas-ignore="true"
-              className="mb-4 flex items-center justify-between gap-4"
+              className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
             >
               <p className="text-sm font-medium text-muted-foreground">
                 <span className="lg:hidden">미리보기</span>
                 <span className="hidden lg:inline">실시간 미리보기</span>
               </p>
-              <Button
-                type="button"
-                onClick={handlePdfDownload}
-                disabled={isDownloading}
-                className="hidden xl:inline-flex"
-              >
-                <Download className="size-4" />
-                {isDownloading ? "PDF 생성 중..." : "PDF 다운로드"}
-              </Button>
+              <DocumentEditorActions
+                className="hidden xl:flex"
+                onSave={handleSave}
+                onPdfDownload={handlePdfDownload}
+                isPdfDownloading={isDownloading}
+              />
             </div>
             <EstimatePreview data={data} sealUrl={sealUrl} />
           </div>
         </div>
       </div>
 
-      <Button
-        type="button"
-        onClick={handlePdfDownload}
-        disabled={isDownloading}
-        size="lg"
+      <div
         data-html2canvas-ignore="true"
-        className="fixed bottom-6 right-6 z-50 shadow-lg xl:hidden"
+        className="fixed bottom-6 right-6 z-50 xl:hidden"
       >
-        <Download className="size-4" />
-        {isDownloading ? "PDF 생성 중..." : "PDF 다운로드"}
-      </Button>
+        <DocumentEditorActions
+          variant="mobile"
+          onSave={handleSave}
+          onPdfDownload={handlePdfDownload}
+          isPdfDownloading={isDownloading}
+        />
+      </div>
 
       {toast && (
         <EstimateToast
           message={toast.message}
           variant={toast.variant}
-          className="bottom-24 xl:bottom-6"
+          className="bottom-32 xl:bottom-6"
         />
       )}
     </>

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const documents = [
   {
-    title: "무료 견적서 생성기",
+    title: "견적서 생성기",
     description:
       "거래처와 품목을 입력하면 견적서를 PDF로 만들 수 있습니다.",
     href: "/documents/estimate",
@@ -26,7 +26,7 @@ const documents = [
     icon: Mail,
   },
   {
-    title: "무료 거래명세서 생성기",
+    title: "거래명세서 생성기",
     description: "공급자와 품목 정보를 입력해 거래명세서를 작성합니다.",
     href: "/documents/statement",
     icon: Receipt,

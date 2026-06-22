@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { PageHeader } from "@/components/page-header"
@@ -25,7 +26,9 @@ export default function SupplyContractPage() {
         title="물품공급계약서 생성기"
         description="공급자와 구매자 정보를 입력하고 공급 물품, 계약 기간, 대금 지급 조건을 설정해 물품공급계약서를 PDF로 저장할 수 있습니다."
       />
-      <SupplyContractGenerator />
+      <Suspense fallback={<div className="px-4 py-10 text-sm text-muted-foreground">문서를 불러오는 중...</div>}>
+        <SupplyContractGenerator />
+      </Suspense>
     </SiteLayout>
   )
 }

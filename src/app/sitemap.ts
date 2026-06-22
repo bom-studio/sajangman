@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next"
 
-import { AI_TOOLS } from "@/data/ai/tools"
 import { CALCULATORS } from "@/data/calculators"
 import { getAllResourceArticles } from "@/data/resources"
 import { SITE_URL } from "@/lib/site-config"
@@ -64,7 +63,6 @@ const STATIC_PAGES: SitemapPageConfig[] = [
   { path: "/calculators", changeFrequency: "weekly", priority: 0.9 },
   { path: "/documents", changeFrequency: "weekly", priority: 0.9 },
   { path: "/resources", changeFrequency: "weekly", priority: 0.9 },
-  { path: "/ai", changeFrequency: "weekly", priority: 0.9 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
 ]
@@ -107,15 +105,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     toSitemapEntry({ ...page, lastModified: builtAt })
   )
 
-  const aiEntries = AI_TOOLS.map((tool) =>
-    toSitemapEntry({
-      path: tool.href,
-      changeFrequency: "monthly",
-      priority: 0.8,
-      lastModified: builtAt,
-    })
-  )
-
   const resourceEntries: MetadataRoute.Sitemap = getAllResourceArticles().map(
     (article) => ({
       url: `${SITE_URL}/resources/${article.slug}`,
@@ -129,7 +118,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...staticEntries,
     ...calculatorEntries,
     ...documentEntries,
-    ...aiEntries,
     ...resourceEntries,
   ]
 }

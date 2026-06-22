@@ -1,10 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
-import { AlertCircle, Download } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { AlertCircle } from "lucide-react"
 
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
+import { DocumentEditorActions } from "@/components/documents/document-editor-actions"
 import { EstimateToast } from "@/components/estimate/estimate-toast"
 import { SupplyContractForm } from "@/components/supply-contract/supply-contract-form"
 import { SupplyContractPreview } from "@/components/supply-contract/supply-contract-preview"
@@ -18,6 +20,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { useSavedDocumentLoader } from "@/hooks/use-saved-document-loader"
+import { buildSupplierSnapshot } from "@/lib/document-metadata"
+import { saveDocument } from "@/lib/documents"
 import { saveStoredSupplier } from "@/lib/estimate-storage"
 import { loadInitialSupplier } from "@/lib/supplier-hydration"
 import {
@@ -41,6 +46,7 @@ import {
   getSupplyContractDocumentElement,
   getSupplyContractPdfFilename,
 } from "@/lib/supply-contract-pdf"
+import type { SavedDocument } from "@/types/documents"
 
 const RELATED_DOCUMENTS = [
   { title: "견적서 생성기", href: "/documents/estimate", available: true },
@@ -86,6 +92,8 @@ function formatBankAccount(
 }
 
 export function SupplyContractGenerator() {
+  const searchParams = useSearchParams()
+  const docIdParam = searchParams.get("docId")
   const [data, setData] = useState<SupplyContractData>(
     getDefaultSupplyContractData
   )
@@ -102,7 +110,34 @@ export function SupplyContractGenerator() {
 
   const totals = calculateSupplyContract(data.items)
 
+  const applyLoadedDocument = useCallback((document: SavedDocument) => {
+    const payload = document.documentData as {
+      data?: SupplyContractData
+      supplierSealUrl?: string | null
+      buyerSealUrl?: string | null
+    }
+
+    if (payload.data) {
+      setData(payload.data)
+    }
+
+    const nextSupplierSeal =
+      payload.supplierSealUrl ??
+      (document.supplierSnapshot.sealUrl as string | null | undefined) ??
+      null
+    setSupplierSealUrl(nextSupplierSeal)
+    setBuyerSealUrl(payload.buyerSealUrl ?? null)
+    setHydrated(true)
+  }, [])
+
+  const { documentId, setDocumentId } = useSavedDocumentLoader({
+    documentType: "supply_contract",
+    onLoad: applyLoadedDocument,
+  })
+
   useEffect(() => {
+    if (docIdParam) return
+
     let cancelled = false
 
     async function hydrate() {
@@ -125,9 +160,7 @@ export function SupplyContractGenerator() {
         return next
       })
 
-      if (storedSupplier?.sealUrl) {
-        setSupplierSealUrl(storedSupplier.sealUrl)
-      }
+      setSupplierSealUrl(storedSupplier?.sealUrl ?? null)
       setHydrated(true)
     }
 
@@ -136,7 +169,7 @@ export function SupplyContractGenerator() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [docIdParam])
 
   useEffect(() => {
     if (!hydrated) return
@@ -195,6 +228,33 @@ export function SupplyContractGenerator() {
     setResetDialogOpen(false)
   }
 
+  async function handleSave() {
+    const result = await saveDocument(
+      {
+        documentType: "supply_contract",
+        documentData: { data, supplierSealUrl, buyerSealUrl },
+        supplierSnapshot: buildSupplierSnapshot(
+          data.supplier as unknown as Record<string, unknown>,
+          supplierSealUrl
+        ),
+        customerSnapshot: data.buyer as unknown as Record<string, unknown>,
+      },
+      documentId
+    )
+
+    if (result.error) {
+      setToast({ message: result.error, variant: "error" })
+      return { error: result.error }
+    }
+
+    if (result.data) {
+      setDocumentId(result.data.id)
+    }
+
+    setToast({ message: "문서가 저장되었습니다.", variant: "success" })
+    return { error: null }
+  }
+
   async function handlePdfDownload() {
     const validationError = validateSupplyContract(data)
     if (validationError) {
@@ -236,7 +296,7 @@ export function SupplyContractGenerator() {
 
   return (
     <>
-      <div className="mx-auto max-w-[1440px] px-4 py-8 pb-24 sm:px-6 lg:px-8 xl:pb-8">
+      <div className="mx-auto max-w-[1440px] px-4 py-8 pb-32 sm:px-6 lg:px-8 xl:pb-8">
         <div className="flex flex-col gap-8 xl:flex-row xl:items-start">
           <div className="xl:w-[40%] xl:shrink-0">
             <p className="mb-4 text-sm font-medium text-muted-foreground lg:hidden">
@@ -256,21 +316,18 @@ export function SupplyContractGenerator() {
           <div className="xl:w-[60%] xl:flex-1">
             <div
               data-html2canvas-ignore="true"
-              className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+              className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
             >
               <p className="text-sm font-medium text-muted-foreground">
                 <span className="lg:hidden">미리보기</span>
                 <span className="hidden lg:inline">실시간 미리보기 (A4)</span>
               </p>
-              <Button
-                type="button"
-                onClick={handlePdfDownload}
-                disabled={isDownloading}
-                className="hidden xl:inline-flex"
-              >
-                <Download className="size-4" />
-                {isDownloading ? "PDF 생성 중..." : "PDF 다운로드"}
-              </Button>
+              <DocumentEditorActions
+                className="hidden xl:flex"
+                onSave={handleSave}
+                onPdfDownload={handlePdfDownload}
+                isPdfDownloading={isDownloading}
+              />
             </div>
 
             <SupplyContractPreview
@@ -373,23 +430,23 @@ export function SupplyContractGenerator() {
         </div>
       </div>
 
-      <Button
-        type="button"
-        onClick={handlePdfDownload}
-        disabled={isDownloading}
-        size="lg"
+      <div
         data-html2canvas-ignore="true"
-        className="fixed bottom-6 right-6 z-50 shadow-lg xl:hidden"
+        className="fixed bottom-6 right-6 z-50 xl:hidden"
       >
-        <Download className="size-4" />
-        {isDownloading ? "PDF 생성 중..." : "PDF 다운로드"}
-      </Button>
+        <DocumentEditorActions
+          variant="mobile"
+          onSave={handleSave}
+          onPdfDownload={handlePdfDownload}
+          isPdfDownloading={isDownloading}
+        />
+      </div>
 
       {toast && (
         <EstimateToast
           message={toast.message}
           variant={toast.variant}
-          className="bottom-24 xl:bottom-6"
+          className="bottom-32 xl:bottom-6"
         />
       )}
 

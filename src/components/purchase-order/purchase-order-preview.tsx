@@ -1,5 +1,6 @@
 "use client"
 
+import { SealSignature } from "@/components/estimate/seal-signature"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   calculatePurchaseOrder,
@@ -37,6 +38,7 @@ const DOC = {
 
 interface PurchaseOrderPreviewProps {
   data: PurchaseOrderData
+  sealUrl?: string | null
   className?: string
 }
 
@@ -97,6 +99,7 @@ function RemarksSection({ remarks }: { remarks: string }) {
 
 export function PurchaseOrderPreview({
   data,
+  sealUrl = null,
   className,
 }: PurchaseOrderPreviewProps) {
   const totals = calculatePurchaseOrder(data.items)
@@ -176,9 +179,11 @@ export function PurchaseOrderPreview({
                   공급자
                 </p>
                 <PreviewField label="상호" value={data.supplier.companyName} />
-                <PreviewField
-                  label="대표자"
-                  value={data.supplier.representative}
+                <SealSignature
+                  representativeName={data.supplier.representative}
+                  sealUrl={sealUrl}
+                  labelColor={DOC.textMuted}
+                  textColor={DOC.text}
                 />
                 <PreviewField
                   label="사업자번호"

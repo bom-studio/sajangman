@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { PageHeader } from "@/components/page-header"
@@ -24,7 +25,9 @@ export default function ReceiptPage() {
         title="영수증 생성기"
         description="공급자 정보와 품목을 입력하면 영수증을 작성하고 PDF로 저장할 수 있습니다."
       />
-      <ReceiptGenerator />
+      <Suspense fallback={<div className="px-4 py-10 text-sm text-muted-foreground">문서를 불러오는 중...</div>}>
+        <ReceiptGenerator />
+      </Suspense>
     </SiteLayout>
   )
 }

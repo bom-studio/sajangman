@@ -6,7 +6,7 @@ import { SealEditorDialog } from "@/components/estimate/seal-editor-dialog"
 import { Button } from "@/components/ui/button"
 
 /** html2canvas와 브라우저가 동일하게 계산하도록 고정 px 사용 */
-const SEAL_PX = 68
+const SEAL_PX = 80
 
 interface SealMarkProps {
   sealUrl: string | null
@@ -54,7 +54,7 @@ export function SealMark({ sealUrl }: SealMarkProps) {
           width: `${SEAL_PX}px`,
           height: `${SEAL_PX}px`,
           objectFit: "contain",
-          opacity: 0.95,
+          opacity: 0.9,
           display: "block",
         }}
       />

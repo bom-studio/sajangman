@@ -17,7 +17,7 @@ create table if not exists public.business_profiles (
 create index if not exists business_profiles_user_id_idx
   on public.business_profiles (user_id);
 
-create index if not exists business_profiles_user_id_default_idx
+create unique index if not exists business_profiles_user_id_default_unique_idx
   on public.business_profiles (user_id)
   where is_default = true;
 
@@ -47,13 +47,14 @@ security definer
 set search_path = public
 as $$
 begin
-  if not exists (
-    select 1
-    from public.business_profiles
-    where user_id = new.user_id
-      and id is distinct from new.id
-  ) then
-    new.is_default := true;
+  if tg_op = 'INSERT' then
+    if not exists (
+      select 1
+      from public.business_profiles
+      where user_id = new.user_id
+    ) then
+      new.is_default := true;
+    end if;
   end if;
 
   if new.is_default = true then
@@ -71,7 +72,7 @@ $$;
 drop trigger if exists business_profiles_single_default on public.business_profiles;
 
 create trigger business_profiles_single_default
-  before insert or update on public.business_profiles
+  before insert or update of is_default on public.business_profiles
   for each row
   execute function public.enforce_single_default_business_profile();
 

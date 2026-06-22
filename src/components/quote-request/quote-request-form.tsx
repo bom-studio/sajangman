@@ -47,12 +47,16 @@ interface QuoteRequestFormProps {
   data: QuoteRequestData
   onChange: (data: QuoteRequestData) => void
   onReset: () => void
+  sealUrl: string | null
+  onSealChange: (url: string | null) => void
 }
 
 export function QuoteRequestForm({
   data,
   onChange,
   onReset,
+  sealUrl,
+  onSealChange,
 }: QuoteRequestFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -71,6 +75,7 @@ export function QuoteRequestForm({
       ...data,
       requester: applyProfileToQuoteRequestRequester(data.requester, profile),
     })
+    onSealChange(profile.sealUrl ?? null)
   }
 
   function updateTarget(field: keyof QuoteRequestContact, value: string) {

@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { PageHeader } from "@/components/page-header"
@@ -24,7 +25,9 @@ export default function PurchaseOrderPage() {
         title="발주서 생성기"
         description="거래처에 보낼 발주서를 작성하고 PDF로 저장할 수 있습니다."
       />
-      <PurchaseOrderGenerator />
+      <Suspense fallback={<div className="px-4 py-10 text-sm text-muted-foreground">문서를 불러오는 중...</div>}>
+        <PurchaseOrderGenerator />
+      </Suspense>
     </SiteLayout>
   )
 }

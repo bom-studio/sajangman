@@ -173,9 +173,7 @@ export function TransactionConfirmationForm({
       ...data,
       supplier: applyProfileToTransactionParty(data.supplier, profile),
     })
-    if (profile.sealUrl) {
-      onSupplierSealChange(profile.sealUrl)
-    }
+    onSupplierSealChange(profile.sealUrl ?? null)
   }
 
   function updateRecipient(field: keyof TransactionParty, value: string) {

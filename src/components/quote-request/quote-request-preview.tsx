@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react"
 
+import { SealMark } from "@/components/estimate/seal-signature"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatPhoneNumber } from "@/lib/format-kr"
 import { QUOTE_REQUEST_DOCUMENT_ID } from "@/lib/quote-request-pdf"
@@ -31,6 +32,7 @@ const DOC = {
 
 interface QuoteRequestPreviewProps {
   data: QuoteRequestData
+  sealUrl?: string | null
   className?: string
 }
 
@@ -106,6 +108,7 @@ function CheckboxList({ items }: { items: string[] }) {
 
 export function QuoteRequestPreview({
   data,
+  sealUrl = null,
   className,
 }: QuoteRequestPreviewProps) {
   const filledItems = data.items.filter(
@@ -371,6 +374,7 @@ export function QuoteRequestPreview({
                 <span style={{ color: DOC.textMuted }}>담당자명 </span>
                 <span className="font-medium" style={{ color: DOC.text }}>
                   {data.requester.contactName || "-"}
+                  <SealMark sealUrl={sealUrl ?? null} />
                 </span>
               </p>
             </div>

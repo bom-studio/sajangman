@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 
 import { FormField } from "@/components/estimate/form-field"
 import { FormTextarea } from "@/components/estimate/form-textarea"
+import { SealUploadField } from "@/components/suppliers/seal-upload-field"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,6 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  deleteBusinessSeal,
+  uploadBusinessSeal,
+} from "@/lib/business-seal-storage"
 import {
   businessProfileToInput,
   createBusinessProfile,
@@ -43,6 +48,9 @@ export function SupplierFormDialog({
   )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [sealPreviewUrl, setSealPreviewUrl] = useState<string | null>(null)
+  const [pendingSealFile, setPendingSealFile] = useState<File | null>(null)
+  const [removeSeal, setRemoveSeal] = useState(false)
 
   const isEditing = profile !== null
 
@@ -51,9 +59,14 @@ export function SupplierFormDialog({
 
     if (profile) {
       setForm(businessProfileToInput(profile))
+      setSealPreviewUrl(profile.sealUrl)
     } else {
       setForm(createEmptyBusinessProfileInput(isFirstProfile))
+      setSealPreviewUrl(null)
     }
+
+    setPendingSealFile(null)
+    setRemoveSeal(false)
     setError(null)
   }, [open, profile, isFirstProfile])
 
@@ -64,19 +77,66 @@ export function SupplierFormDialog({
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
+  function handleSealFileSelect(file: File, previewUrl: string) {
+    setPendingSealFile(file)
+    setSealPreviewUrl(previewUrl)
+    setRemoveSeal(false)
+    setError(null)
+  }
+
+  function handleSealRemove() {
+    setPendingSealFile(null)
+    setRemoveSeal(true)
+    setSealPreviewUrl(null)
+    setError(null)
+  }
+
+  async function syncSeal(profileId: string): Promise<string | null> {
+    if (removeSeal) {
+      const deleteResult = await deleteBusinessSeal(profileId)
+      if (deleteResult.error) {
+        return deleteResult.error
+      }
+      return null
+    }
+
+    if (!pendingSealFile) {
+      return null
+    }
+
+    const uploadResult = await uploadBusinessSeal(profileId, pendingSealFile)
+    if (uploadResult.error) {
+      return uploadResult.error
+    }
+
+    return null
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
     setSaving(true)
     setError(null)
 
-    const result = isEditing
-      ? await updateBusinessProfile(profile.id, form)
-      : await createBusinessProfile(form)
+    const profileInput = {
+      ...form,
+      sealUrl: removeSeal ? "" : form.sealUrl,
+    }
 
+    const result = isEditing
+      ? await updateBusinessProfile(profile.id, profileInput)
+      : await createBusinessProfile(profileInput)
+
+    if (result.error || !result.data) {
+      setSaving(false)
+      setError(result.error ?? "공급자 저장에 실패했습니다.")
+      return
+    }
+
+    const sealError = await syncSeal(result.data.id)
     setSaving(false)
 
-    if (result.error) {
-      setError(result.error)
+    if (sealError) {
+      setError(sealError)
       return
     }
 
@@ -134,11 +194,14 @@ export function SupplierFormDialog({
             placeholder="서울특별시 ..."
             rows={2}
           />
-          <FormField
-            label="직인 이미지 URL"
-            value={form.sealUrl}
-            onChange={(value) => updateField("sealUrl", value)}
-            placeholder="https://... (추후 업로드 기능 예정)"
+
+          <SealUploadField
+            previewUrl={sealPreviewUrl}
+            representativeName={form.representativeName}
+            onFileSelect={handleSealFileSelect}
+            onValidationError={setError}
+            onRemove={handleSealRemove}
+            disabled={saving}
           />
 
           <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/60 bg-muted/20 p-4">

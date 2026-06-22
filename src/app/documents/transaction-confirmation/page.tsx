@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { PageHeader } from "@/components/page-header"
@@ -24,7 +25,9 @@ export default function TransactionConfirmationPage() {
         title="거래확인서 생성기"
         description="거래 내역을 정리하여 거래확인서를 작성하고 PDF로 저장할 수 있습니다."
       />
-      <TransactionConfirmationGenerator />
+      <Suspense fallback={<div className="px-4 py-10 text-sm text-muted-foreground">문서를 불러오는 중...</div>}>
+        <TransactionConfirmationGenerator />
+      </Suspense>
     </SiteLayout>
   )
 }

@@ -128,9 +128,7 @@ export function DeliveryNoteForm({
       ...data,
       supplier: applyProfileToSupplierInfo(data.supplier, profile),
     })
-    if (profile.sealUrl) {
-      onSealChange(profile.sealUrl)
-    }
+    onSealChange(profile.sealUrl ?? null)
   }
 
   function updateRecipient(

@@ -135,6 +135,26 @@ export function SupplierCard({
                 </>
               )}
             </dl>
+
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <p className="mb-2 text-xs font-medium text-muted-foreground">
+                직인
+              </p>
+              {profile.sealUrl ? (
+                <div className="flex size-20 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-white p-1.5">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={profile.sealUrl}
+                    alt={`${profile.companyName} 직인`}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  등록된 직인이 없습니다
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2 sm:shrink-0 sm:flex-col">

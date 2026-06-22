@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { DeliveryNoteGenerator } from "@/components/delivery-note/delivery-note-generator"
@@ -24,7 +25,9 @@ export default function DeliveryNotePage() {
         title="납품서 생성기"
         description="거래처에 제출할 납품서를 작성하고 PDF로 저장할 수 있습니다."
       />
-      <DeliveryNoteGenerator />
+      <Suspense fallback={<div className="px-4 py-10 text-sm text-muted-foreground">문서를 불러오는 중...</div>}>
+        <DeliveryNoteGenerator />
+      </Suspense>
     </SiteLayout>
   )
 }

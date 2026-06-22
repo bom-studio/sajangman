@@ -11,7 +11,7 @@ import {
 } from "@/lib/documents-nav"
 import { cn } from "@/lib/utils"
 
-export function DocumentsMobileNav() {
+export function DocumentManagementMobileNav() {
   const pathname = usePathname()
   const router = useRouter()
   const currentLabel = getDocumentsNavLabel(pathname)
@@ -68,3 +68,6 @@ export function DocumentsMobileNav() {
     </div>
   )
 }
+
+/** @deprecated DocumentManagementMobileNav 사용 */
+export const DocumentsMobileNav = DocumentManagementMobileNav
