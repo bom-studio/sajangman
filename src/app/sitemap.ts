@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next"
 
-import { AI_TOOLS } from "@/data/ai/tools"
 import { CALCULATORS } from "@/data/calculators"
 import { getAllResourceArticles } from "@/data/resources"
 import { SITE_URL } from "@/lib/site-config"
@@ -17,46 +16,14 @@ interface SitemapPageConfig {
 }
 
 const DOCUMENT_PAGES: SitemapPageConfig[] = [
-  {
-    path: "/documents/estimate",
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
-  {
-    path: "/documents/quote-request",
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
-  {
-    path: "/documents/statement",
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
-  {
-    path: "/documents/purchase-order",
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
-  {
-    path: "/documents/supply-contract",
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
-  {
-    path: "/documents/delivery-note",
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
-  {
-    path: "/documents/receipt",
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
-  {
-    path: "/documents/transaction-confirmation",
-    changeFrequency: "monthly",
-    priority: 0.8,
-  },
+  { path: "/documents/estimate", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/documents/quote-request", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/documents/statement", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/documents/purchase-order", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/documents/supply-contract", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/documents/delivery-note", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/documents/receipt", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/documents/transaction-confirmation", changeFrequency: "monthly", priority: 0.8 },
 ]
 
 const STATIC_PAGES: SitemapPageConfig[] = [
@@ -64,13 +31,25 @@ const STATIC_PAGES: SitemapPageConfig[] = [
   { path: "/calculators", changeFrequency: "weekly", priority: 0.9 },
   { path: "/documents", changeFrequency: "weekly", priority: 0.9 },
   { path: "/resources", changeFrequency: "weekly", priority: 0.9 },
-  { path: "/ai", changeFrequency: "weekly", priority: 0.9 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
 ]
 
+function getSiteUrl() {
+  return SITE_URL.replace(/\/$/, "")
+}
+
 function toAbsoluteUrl(path: string): string {
-  return path === "/" ? SITE_URL : `${SITE_URL}${path}`
+  const baseUrl = getSiteUrl()
+  return path === "/" ? baseUrl : `${baseUrl}${path}`
+}
+
+function toSafeDate(value?: Date | string): Date {
+  if (!value) return new Date()
+
+  const date = value instanceof Date ? value : new Date(value)
+
+  return Number.isNaN(date.getTime()) ? new Date() : date
 }
 
 function toSitemapEntry({
@@ -81,7 +60,7 @@ function toSitemapEntry({
 }: SitemapPageConfig): MetadataRoute.Sitemap[number] {
   return {
     url: toAbsoluteUrl(path),
-    lastModified: lastModified ?? new Date(),
+    lastModified: toSafeDate(lastModified),
     changeFrequency,
     priority,
   }
@@ -107,29 +86,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     toSitemapEntry({ ...page, lastModified: builtAt })
   )
 
-  const aiEntries = AI_TOOLS.map((tool) =>
-    toSitemapEntry({
-      path: tool.href,
-      changeFrequency: "monthly",
-      priority: 0.8,
-      lastModified: builtAt,
-    })
-  )
-
-  const resourceEntries: MetadataRoute.Sitemap = getAllResourceArticles().map(
-    (article) => ({
-      url: `${SITE_URL}/resources/${article.slug}`,
-      lastModified: article.publishedAt,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    })
-  )
+  const resourceEntries = getAllResourceArticles()
+    .filter((article) => article.slug)
+    .map((article) =>
+      toSitemapEntry({
+        path: `/resources/${article.slug}`,
+        changeFrequency: "monthly",
+        priority: 0.7,
+        lastModified: article.publishedAt,
+      })
+    )
 
   return [
     ...staticEntries,
     ...calculatorEntries,
     ...documentEntries,
-    ...aiEntries,
     ...resourceEntries,
   ]
 }
