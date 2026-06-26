@@ -2,11 +2,14 @@ import type { MetadataRoute } from "next"
 
 import { CALCULATORS } from "@/data/calculators"
 import { getAllResourceArticles } from "@/data/resources"
+import { getTodayKST } from "@/lib/date-kst"
 import { SITE_URL } from "@/lib/site-config"
 
 type ChangeFrequency = NonNullable<
   MetadataRoute.Sitemap[number]["changeFrequency"]
 >
+
+const SITEMAP_LAST_MODIFIED = "2026-06-23"
 
 interface SitemapPageConfig {
   path: string
@@ -44,12 +47,31 @@ function toAbsoluteUrl(path: string): string {
   return path === "/" ? baseUrl : `${baseUrl}${path}`
 }
 
-function toSafeDate(value?: Date | string): Date {
-  if (!value) return new Date()
+function toDateString(value: Date | string): string | null {
+  if (typeof value === "string") {
+    const dateStr = value.slice(0, 10)
+    return /^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? dateStr : null
+  }
 
-  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(value.getTime())) return null
 
-  return Number.isNaN(date.getTime()) ? new Date() : date
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, "0")
+  const day = String(value.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
+function minDateString(a: string, b: string): string {
+  return a <= b ? a : b
+}
+
+function resolveLastModified(
+  value: Date | string | undefined,
+  today: string
+): string {
+  const dateStr = value ? toDateString(value) : null
+  const base = dateStr ?? SITEMAP_LAST_MODIFIED
+  return minDateString(base, today)
 }
 
 function toSitemapEntry({
@@ -57,20 +79,23 @@ function toSitemapEntry({
   changeFrequency,
   priority,
   lastModified,
-}: SitemapPageConfig): MetadataRoute.Sitemap[number] {
+}: SitemapPageConfig & { lastModified: string }): MetadataRoute.Sitemap[number] {
   return {
     url: toAbsoluteUrl(path),
-    lastModified: toSafeDate(lastModified),
+    lastModified,
     changeFrequency,
     priority,
   }
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const builtAt = new Date()
+  const today = getTodayKST()
 
   const staticEntries = STATIC_PAGES.map((page) =>
-    toSitemapEntry({ ...page, lastModified: builtAt })
+    toSitemapEntry({
+      ...page,
+      lastModified: resolveLastModified(SITEMAP_LAST_MODIFIED, today),
+    })
   )
 
   const calculatorEntries = CALCULATORS.map((calculator) =>
@@ -78,12 +103,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       path: calculator.href,
       changeFrequency: "monthly",
       priority: 0.8,
-      lastModified: builtAt,
+      lastModified: resolveLastModified(SITEMAP_LAST_MODIFIED, today),
     })
   )
 
   const documentEntries = DOCUMENT_PAGES.map((page) =>
-    toSitemapEntry({ ...page, lastModified: builtAt })
+    toSitemapEntry({
+      ...page,
+      lastModified: resolveLastModified(SITEMAP_LAST_MODIFIED, today),
+    })
   )
 
   const resourceEntries = getAllResourceArticles()
@@ -93,7 +121,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         path: `/resources/${article.slug}`,
         changeFrequency: "monthly",
         priority: 0.7,
-        lastModified: article.publishedAt,
+        lastModified: resolveLastModified(article.publishedAt, today),
       })
     )
 
