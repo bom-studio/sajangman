@@ -2,12 +2,12 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Menu, X } from "lucide-react"
+import { ArrowRight, Menu, X } from "lucide-react"
 
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-
 import { AI_FEATURES_ENABLED } from "@/lib/features"
+import { BOM_STUDIO_URL } from "@/lib/site-config"
+import { cn } from "@/lib/utils"
 
 const allNavItems = [
   { label: "홈", href: "/" },
@@ -21,15 +21,45 @@ const navItems = AI_FEATURES_ENABLED
   ? allNavItems
   : allNavItems.filter((item) => item.href !== "/ai")
 
+function BomStudioHeaderCta({
+  className,
+  compact = false,
+}: {
+  className?: string
+  compact?: boolean
+}) {
+  return (
+    <a
+      href={BOM_STUDIO_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        "inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#EF111B] font-bold text-white transition-colors hover:bg-[#d40f18] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EF111B] focus-visible:ring-offset-2",
+        compact ? "h-9 px-3 text-xs" : "h-10 px-3.5 text-sm",
+        className
+      )}
+    >
+      <span
+        aria-hidden
+        className="flex size-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-[11px] font-extrabold leading-none"
+      >
+        B
+      </span>
+      <span>홈페이지 제작</span>
+      <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+    </a>
+  )
+}
+
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-white/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="text-xl font-bold tracking-tight text-foreground"
+          className="shrink-0 text-xl font-bold tracking-tight text-foreground"
         >
           <span className="text-primary">사장</span>만
         </Link>
@@ -46,15 +76,23 @@ export function Header() {
           ))}
         </nav>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setMobileOpen((prev) => !prev)}
-          aria-label={mobileOpen ? "메뉴 닫기" : "메뉴 열기"}
-        >
-          {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <BomStudioHeaderCta className="hidden sm:inline-flex" />
+          <BomStudioHeaderCta className="sm:hidden" compact />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setMobileOpen((prev) => !prev)}
+            aria-label={mobileOpen ? "메뉴 닫기" : "메뉴 열기"}
+          >
+            {mobileOpen ? (
+              <X className="size-5" />
+            ) : (
+              <Menu className="size-5" />
+            )}
+          </Button>
+        </div>
       </div>
 
       <nav
