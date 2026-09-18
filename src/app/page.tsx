@@ -4,6 +4,7 @@ import { BomStudioCtaSection } from "@/components/home/bom-studio-cta-section"
 import { HomeLatestResourcesSection } from "@/components/home/home-latest-resources-section"
 import { HomePopularAiSection } from "@/components/home/home-popular-ai-section"
 import { HomePopularCalculatorsSection } from "@/components/home/home-popular-calculators-section"
+import { HomeRequestsCtaSection } from "@/components/home/home-requests-cta-section"
 import { HomeSchemas } from "@/components/home/home-schemas"
 import { QuickStartSection } from "@/components/home/quick-start-section"
 import { ServiceCategoriesSection } from "@/components/home/service-categories-section"
@@ -24,6 +25,7 @@ export default function HomePage() {
       <BomStudioCtaSection />
       {AI_FEATURES_ENABLED ? <HomePopularAiSection /> : null}
       <HomeLatestResourcesSection />
+      <HomeRequestsCtaSection />
       <CtaSection />
     </SiteLayout>
   )
