@@ -7,7 +7,6 @@ import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { createFeatureRequestAction } from "@/lib/requests/actions"
 import {
   CATEGORY_OPTIONS,
   INDUSTRY_OPTIONS,
@@ -27,6 +26,7 @@ export function RequestForm() {
   const [content, setContent] = useState("")
   const [industry, setIndustry] = useState("")
   const [nickname, setNickname] = useState("")
+  const [website, setWebsite] = useState("")
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -44,16 +44,23 @@ export function RequestForm() {
     }
 
     startTransition(async () => {
-      const result = await createFeatureRequestAction({
-        category,
-        title,
-        content,
-        industry: industry
-          ? (industry as (typeof INDUSTRY_OPTIONS)[number]["value"])
-          : null,
-        nickname: nickname.trim() || null,
-        visitorId,
+      const response = await fetch("/api/requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category,
+          title,
+          content,
+          industry: industry || null,
+          nickname: nickname.trim() || null,
+          visitor_id: visitorId,
+          website,
+        }),
       })
+
+      const result = (await response.json()) as
+        | { ok: true; id: string }
+        | { ok: false; error: string }
 
       if (!result.ok) {
         setError(result.error)
@@ -66,7 +73,21 @@ export function RequestForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="relative space-y-8">
+      {/* Honeypot — hidden from users */}
+      <div className="absolute -left-[9999px] top-auto h-0 w-0 overflow-hidden" aria-hidden>
+        <label htmlFor="website">Website</label>
+        <input
+          id="website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={website}
+          onChange={(event) => setWebsite(event.target.value)}
+        />
+      </div>
+
       <fieldset>
         <legend className="text-base font-bold text-foreground">
           1. 어떤 기능인가요?

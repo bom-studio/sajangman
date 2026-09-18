@@ -3,12 +3,16 @@ import type { Metadata } from "next"
 import { CalculatorHeader } from "@/components/calculators/calculator-header"
 import { CalculatorSeoSchemas } from "@/components/calculators/calculator-seo-schemas"
 import { UnemploymentBenefitCalculator } from "@/components/calculators/unemployment-benefit-calculator"
+import { PageBreadcrumb } from "@/components/page-breadcrumb"
 import { SiteLayout } from "@/components/site-layout"
 import { getCalculatorSeoConfig } from "@/lib/calculators/seo/page-config"
+import { buildCalculatorMetadata } from "@/lib/seo/metadata"
 
-const SEO = getCalculatorSeoConfig("/calculators/unemployment-benefit")
+const PATH = "/calculators/unemployment-benefit"
+const SEO = getCalculatorSeoConfig(PATH)
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildCalculatorMetadata({
+  path: PATH,
   title: "실업급여 계산기 | 사장만",
   description:
     "퇴사 전 평균임금, 근속기간, 나이를 입력하면 예상 실업급여를 계산할 수 있습니다.",
@@ -20,11 +24,18 @@ export const metadata: Metadata = {
     "퇴사",
     "사장만",
   ],
-}
+})
 
 export default function UnemploymentBenefitCalculatorPage() {
   return (
     <SiteLayout>
+      <PageBreadcrumb
+        items={[
+          { label: "홈", href: "/" },
+          { label: "계산기", href: "/calculators" },
+          { label: "실업급여 계산기" },
+        ]}
+      />
       <CalculatorSeoSchemas
         calculatorName={SEO.name}
         calculatorHref={SEO.href}

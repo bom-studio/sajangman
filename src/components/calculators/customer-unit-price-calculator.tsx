@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, type ReactNode } from "react"
 
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
 import { CalculatorInputCard } from "@/components/calculators/calculator-input-card"
@@ -188,7 +188,11 @@ function CustomerUnitPriceFormulaCard({
   )
 }
 
-export function CustomerUnitPriceCalculator() {
+export function CustomerUnitPriceCalculator({
+  seoArticles,
+}: {
+  seoArticles?: ReactNode
+} = {}) {
   const resultsRef = useRef<HTMLDivElement>(null)
   const [totalRevenue, setTotalRevenue] = useState(
     DEFAULT_CUSTOMER_UNIT_PRICE_INPUT.totalRevenue
@@ -374,6 +378,7 @@ export function CustomerUnitPriceCalculator() {
       }
       seo={
         <>
+          {seoArticles}
           <CalculatorFaq
             description={CUSTOMER_UNIT_PRICE_GUIDE_DESCRIPTION}
             items={CUSTOMER_UNIT_PRICE_GUIDE_ITEMS}

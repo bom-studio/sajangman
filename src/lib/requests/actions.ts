@@ -8,7 +8,7 @@ import {
 } from "@/lib/requests/queries"
 
 export async function createFeatureRequestAction(
-  input: CreateFeatureRequestInput
+  input: CreateFeatureRequestInput & { website?: string | null }
 ) {
   return createFeatureRequest(input)
 }

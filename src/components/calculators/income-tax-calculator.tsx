@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, type ReactNode } from "react"
 import { AlertCircle } from "lucide-react"
 
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
@@ -137,7 +137,11 @@ function IncomeTaxDetailCard({
   )
 }
 
-export function IncomeTaxCalculator() {
+export function IncomeTaxCalculator({
+  seoArticles,
+}: {
+  seoArticles?: ReactNode
+} = {}) {
   const resultsRef = useRef<HTMLDivElement>(null)
   const [annualRevenue, setAnnualRevenue] = useState(
     DEFAULT_INCOME_TAX_INPUT.annualRevenue
@@ -340,6 +344,7 @@ export function IncomeTaxCalculator() {
       }
       seo={
         <>
+          {seoArticles}
           <CalculatorFaq
             description={INCOME_TAX_GUIDE_DESCRIPTION}
             items={INCOME_TAX_GUIDE_ITEMS}

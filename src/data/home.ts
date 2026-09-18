@@ -67,9 +67,7 @@ export const HOME_FEATURED_CALCULATOR_HREFS = [
 export const HOME_FEATURED_RESOURCE_SLUGS = [
   "weekly-pay-guide",
   "vat-filing-guide",
-  "simplified-vs-general-vat",
   "delivery-app-fees-comparison",
-  "restaurant-cost-rate-management",
   "break-even-calculation-guide",
 ] as const
 

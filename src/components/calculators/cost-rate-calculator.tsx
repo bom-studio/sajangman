@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, type ReactNode } from "react"
 
 import { CalculatorDonutChart } from "@/components/calculators/calculator-donut-chart"
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
@@ -24,7 +24,11 @@ import {
 } from "@/lib/calculators/format"
 import { getCostRateStatus } from "@/lib/calculators/result-status"
 
-export function CostRateCalculator() {
+export function CostRateCalculator({
+  seoArticles,
+}: {
+  seoArticles?: ReactNode
+} = {}) {
   const resultsRef = useRef<HTMLDivElement>(null)
   const [sellingPrice, setSellingPrice] = useState(
     DEFAULT_COST_RATE_INPUT.sellingPrice
@@ -162,10 +166,13 @@ export function CostRateCalculator() {
         />
       }
       seo={
-        <CalculatorFaq
-          description={COST_RATE_GUIDE_DESCRIPTION}
-          items={COST_RATE_FAQ_ITEMS}
-        />
+        <>
+          {seoArticles}
+          <CalculatorFaq
+            description={COST_RATE_GUIDE_DESCRIPTION}
+            items={COST_RATE_FAQ_ITEMS}
+          />
+        </>
       }
     />
   )

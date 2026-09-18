@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 
 import { CalculatorCopyButton } from "@/components/calculators/calculator-copy-button"
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
@@ -155,7 +155,11 @@ function VatCalculationCard({
   )
 }
 
-export function VatCalculator() {
+export function VatCalculator({
+  seoArticles,
+}: {
+  seoArticles?: ReactNode
+} = {}) {
   return (
     <div className="mx-auto max-w-[1440px] px-4 pb-8 pt-6 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -173,6 +177,7 @@ export function VatCalculator() {
         />
       </div>
 
+      {seoArticles}
       <CalculatorFaq
         description={VAT_GUIDE_DESCRIPTION}
         items={VAT_FAQ_ITEMS}

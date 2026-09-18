@@ -60,10 +60,10 @@ export function RelatedCalculators({
   return (
     <section className={cn("border-t border-slate-200 pt-12", className)}>
       <h2 className="text-2xl font-bold tracking-tight text-foreground">
-        관련 계산기
+        함께 사용하면 좋은 계산기
       </h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        다른 계산기도 함께 활용해 보세요.
+        같은 업무에 자주 함께 쓰는 계산기입니다.
       </p>
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (

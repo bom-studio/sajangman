@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, type ReactNode } from "react"
 import { AlertCircle } from "lucide-react"
 
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
@@ -351,7 +351,11 @@ function buildCopyText(allResults: AppComparisonResult[]): string {
   return lines.join("\n")
 }
 
-export function DeliveryMarginCalculator() {
+export function DeliveryMarginCalculator({
+  seoArticles,
+}: {
+  seoArticles?: ReactNode
+} = {}) {
   const resultsRef = useRef<HTMLDivElement>(null)
   const [viewMode, setViewMode] = useState<ViewModeId>(DEFAULT_INPUTS.viewMode)
   const [orderType, setOrderType] = useState<OrderTypeId>(
@@ -700,10 +704,13 @@ export function DeliveryMarginCalculator() {
           </Card>
         }
         seo={
-          <CalculatorFaq
-            description={DELIVERY_MARGIN_GUIDE_DESCRIPTION}
-            items={DELIVERY_MARGIN_FAQ_ITEMS}
-          />
+          <>
+            {seoArticles}
+            <CalculatorFaq
+              description={DELIVERY_MARGIN_GUIDE_DESCRIPTION}
+              items={DELIVERY_MARGIN_FAQ_ITEMS}
+            />
+          </>
         }
       />
 

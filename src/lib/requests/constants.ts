@@ -4,9 +4,13 @@ import type {
   FeatureRequestStatus,
 } from "@/lib/supabase/database.types"
 
-export const REQUESTS_PAGE_SIZE = 12
+export { SITE_KEY } from "@/lib/site-key"
+export { VISITOR_STORAGE_KEY } from "@/lib/visitor/id"
 
-export const VISITOR_STORAGE_KEY = "sajangman_visitor_id"
+/** Hardcoded for sajangman — never accept from client */
+export const BOARD_KEY = "feature_requests" as const
+
+export const REQUESTS_PAGE_SIZE = 12
 
 export const RATE_LIMIT_WINDOW_MS = 60_000
 export const RATE_LIMIT_MAX_PER_WINDOW = 3

@@ -3,10 +3,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { ThumbsUp } from "lucide-react"
 
-import {
-  hasVisitorVotedAction,
-  toggleFeatureRequestVoteAction,
-} from "@/lib/requests/actions"
+import { hasVisitorVotedAction } from "@/lib/requests/actions"
 import { getVisitorId } from "@/lib/requests/visitor"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -54,11 +51,21 @@ export function VoteButton({
     }
 
     startTransition(async () => {
-      const result = await toggleFeatureRequestVoteAction(requestId, visitorId)
+      const response = await fetch(`/api/requests/${requestId}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitor_id: visitorId }),
+      })
+
+      const result = (await response.json()) as
+        | { ok: true; voted: boolean; voteCount: number }
+        | { ok: false; error: string }
+
       if (!result.ok) {
         setError(result.error)
         return
       }
+
       setVoted(result.voted)
       setCount(result.voteCount)
     })

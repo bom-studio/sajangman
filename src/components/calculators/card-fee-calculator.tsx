@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, type ReactNode } from "react"
 
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
 import { CalculatorInputCard } from "@/components/calculators/calculator-input-card"
@@ -272,7 +272,11 @@ function CardFeeFormulaCard({ result }: { result: CardFeeResult }) {
   )
 }
 
-export function CardFeeCalculator() {
+export function CardFeeCalculator({
+  seoArticles,
+}: {
+  seoArticles?: ReactNode
+} = {}) {
   const resultsRef = useRef<HTMLDivElement>(null)
   const [cardSales, setCardSales] = useState(DEFAULT_CARD_FEE_INPUT.cardSales)
   const [feeRate, setFeeRate] = useState(DEFAULT_CARD_FEE_INPUT.feeRate)
@@ -473,6 +477,7 @@ export function CardFeeCalculator() {
       }
       seo={
         <>
+          {seoArticles}
           <CalculatorFaq
             description={CARD_FEE_GUIDE_DESCRIPTION}
             items={CARD_FEE_GUIDE_ITEMS}

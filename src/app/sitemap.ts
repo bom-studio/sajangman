@@ -9,7 +9,7 @@ type ChangeFrequency = NonNullable<
   MetadataRoute.Sitemap[number]["changeFrequency"]
 >
 
-const SITEMAP_LAST_MODIFIED = "2026-06-23"
+const SITEMAP_LAST_MODIFIED = "2026-09-18"
 
 interface SitemapPageConfig {
   path: string

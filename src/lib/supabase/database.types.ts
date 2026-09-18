@@ -45,6 +45,18 @@ export interface FeatureRequestVoteRow {
   created_at: string
 }
 
+/** Multi-site unique visitors — partitioned by site_key */
+export interface SiteVisitorRow {
+  id: string
+  site_key: string
+  visitor_id: string
+  first_seen_at: string
+  last_seen_at: string
+  visit_count: number
+  created_at: string
+  updated_at: string
+}
+
 export type Database = {
   public: {
     Tables: {

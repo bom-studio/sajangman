@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, type ReactNode } from "react"
 import { AlertCircle } from "lucide-react"
 
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
@@ -193,7 +193,11 @@ function PaybackPeriodFormulaCard({ result }: { result: PaybackPeriodResult }) {
   )
 }
 
-export function PaybackPeriodCalculator() {
+export function PaybackPeriodCalculator({
+  seoArticles,
+}: {
+  seoArticles?: ReactNode
+} = {}) {
   const resultsRef = useRef<HTMLDivElement>(null)
   const [initialInvestment, setInitialInvestment] = useState(
     DEFAULT_PAYBACK_PERIOD_INPUT.initialInvestment
@@ -447,6 +451,7 @@ export function PaybackPeriodCalculator() {
       }
       seo={
         <>
+          {seoArticles}
           <CalculatorFaq
             description={PAYBACK_PERIOD_GUIDE_DESCRIPTION}
             items={PAYBACK_PERIOD_GUIDE_ITEMS}

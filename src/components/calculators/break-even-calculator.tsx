@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState, type ReactNode } from "react"
 import {
   CartesianGrid,
   Line,
@@ -293,7 +293,11 @@ function BreakEvenDetailCard({
   )
 }
 
-export function BreakEvenCalculator() {
+export function BreakEvenCalculator({
+  seoArticles,
+}: {
+  seoArticles?: ReactNode
+} = {}) {
   const resultsRef = useRef<HTMLDivElement>(null)
   const [fixedCost, setFixedCost] = useState(DEFAULT_BREAK_EVEN_INPUT.fixedCost)
   const [sellingPrice, setSellingPrice] = useState(
@@ -469,10 +473,13 @@ export function BreakEvenCalculator() {
         </>
       }
       seo={
-        <CalculatorFaq
-          description={BREAK_EVEN_GUIDE_DESCRIPTION}
-          items={BREAK_EVEN_FAQ_ITEMS}
-        />
+        <>
+          {seoArticles}
+          <CalculatorFaq
+            description={BREAK_EVEN_GUIDE_DESCRIPTION}
+            items={BREAK_EVEN_FAQ_ITEMS}
+          />
+        </>
       }
     />
   )

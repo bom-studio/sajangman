@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, type ReactNode } from "react"
 
 import { CalculatorFaq } from "@/components/calculators/calculator-faq"
 import { CalculatorInputCard } from "@/components/calculators/calculator-input-card"
@@ -212,7 +212,11 @@ function InventoryTurnoverFormulaCard({
   )
 }
 
-export function InventoryTurnoverCalculator() {
+export function InventoryTurnoverCalculator({
+  seoArticles,
+}: {
+  seoArticles?: ReactNode
+} = {}) {
   const resultsRef = useRef<HTMLDivElement>(null)
   const [period, setPeriod] = useState<InventoryPeriod>(
     DEFAULT_INVENTORY_TURNOVER_INPUT.period
@@ -430,6 +434,7 @@ export function InventoryTurnoverCalculator() {
       }
       seo={
         <>
+          {seoArticles}
           <CalculatorFaq
             description={INVENTORY_TURNOVER_GUIDE_DESCRIPTION}
             items={INVENTORY_TURNOVER_GUIDE_ITEMS}

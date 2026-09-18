@@ -1,6 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Search } from "lucide-react"
 
 import {
@@ -19,9 +20,26 @@ import {
 import type { ResourceCategoryId } from "@/lib/resources/types"
 import { cn } from "@/lib/utils"
 
+function parseCategoryParam(
+  value: string | null
+): ResourceCategoryId | "all" {
+  if (!value || value === "all") return "all"
+  if (RESOURCE_CATEGORIES.some((item) => item.id === value)) {
+    return value as ResourceCategoryId
+  }
+  return "all"
+}
+
 export function CalculatorHub() {
+  const searchParams = useSearchParams()
   const [query, setQuery] = useState("")
-  const [category, setCategory] = useState<ResourceCategoryId | "all">("all")
+  const [category, setCategory] = useState<ResourceCategoryId | "all">(() =>
+    parseCategoryParam(searchParams.get("category"))
+  )
+
+  useEffect(() => {
+    setCategory(parseCategoryParam(searchParams.get("category")))
+  }, [searchParams])
 
   const popularCalculators = useMemo(() => getPopularCalculators(), [])
 

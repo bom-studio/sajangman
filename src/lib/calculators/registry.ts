@@ -53,6 +53,7 @@ export const RELATED_CALCULATOR_HREFS: Record<string, string[]> = {
   ],
   "/calculators/income-tax": [
     "/calculators/vat",
+    "/calculators/vat-type-compare",
     "/calculators/cost-rate",
     "/calculators/break-even",
     "/calculators/sales-goal",
@@ -115,11 +116,11 @@ export const RELATED_CALCULATOR_HREFS: Record<string, string[]> = {
     "/calculators/break-even",
   ],
   "/calculators/cost-rate": [
-    "/calculators/inventory-turnover",
-    "/calculators/customer-unit-price",
-    "/calculators/sales-goal",
     "/calculators/menu-price",
     "/calculators/break-even",
+    "/calculators/delivery-margin",
+    "/calculators/customer-unit-price",
+    "/calculators/sales-goal",
   ],
   "/calculators/inventory-turnover": [
     "/calculators/cost-rate",

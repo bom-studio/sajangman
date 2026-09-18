@@ -1,71 +1,69 @@
+import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Calculator, FileText, Sparkles } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { AI_FEATURES_ENABLED } from "@/lib/features"
+
+function HeroVisual() {
+  return (
+    <div className="relative flex w-full items-center justify-center overflow-visible lg:justify-end">
+      <Image
+        src="/home/hero.png"
+        alt="부가세 계산기, 견적서 작성, 배달 마진 계산기 화면 미리보기"
+        width={720}
+        height={720}
+        priority
+        sizes="(max-width: 1024px) 100vw, 560px"
+        className="h-auto w-full max-w-[420px] object-contain object-center lg:max-h-[420px] lg:max-w-[560px] lg:origin-right lg:translate-x-5 lg:scale-[1.12] lg:object-right"
+      />
+    </div>
+  )
+}
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]" />
+    <section className="overflow-x-hidden bg-[#F4F8FF]">
+      <div className="mx-auto grid max-w-[1200px] items-center gap-8 px-4 pt-10 pb-9 sm:px-6 sm:pt-11 sm:pb-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-8 lg:px-8 lg:pt-14 lg:pb-11">
+        <div className="min-w-0">
+          <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            자영업자를 위한 무료 업무 도구
+          </span>
 
-      <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8 lg:py-32">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            <span className="text-primary">사장</span>만
+          <h1 className="mt-4 text-[36px] font-black leading-[1.08] tracking-[-0.04em] text-[#0F172A] sm:text-[44px] lg:text-[52px]">
+            사장님,
+            <br />
+            <span className="text-primary">장사에만 집중하세요.</span>
           </h1>
-          <p className="mt-4 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-            사장님, 장사만 하세요.
-          </p>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-            자영업자·소상공인이 운영에 필요한 숫자와 정보를
+          <p className="mt-5 max-w-xl text-[16px] leading-relaxed text-[#64748B] sm:text-[18px]">
+            계산부터 문서 작성, 사업 운영 정보까지
             <br className="hidden sm:block" />
-            빠르게 확인할 수 있는 무료 실무 도구입니다.
+            사장님에게 필요한 업무 도구를 한곳에서 제공합니다.
           </p>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Button
               asChild
               size="lg"
-              className="h-12 w-full rounded-xl px-6 text-base sm:w-auto"
+              className="h-12 rounded-xl px-6 text-base"
             >
               <Link href="/calculators">
-                <Calculator className="size-4" />
                 계산기 바로가기
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
             <Button
               asChild
-              variant="outline"
               size="lg"
-              className="h-12 w-full rounded-xl px-6 text-base sm:w-auto"
+              variant="outline"
+              className="h-12 rounded-xl border-[#E2E8F0] bg-white px-6 text-base"
             >
-              <Link href="/documents/estimate">
-                <FileText className="size-4" />
-                견적서 작성하기
-              </Link>
+              <Link href="/documents/estimate">견적서 작성하기</Link>
             </Button>
-            {AI_FEATURES_ENABLED ? (
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="h-12 w-full rounded-xl px-6 text-base sm:w-auto"
-              >
-                <Link href="/ai">
-                  <Sparkles className="size-4" />
-                  AI 생성기 사용하기
-                </Link>
-              </Button>
-            ) : null}
           </div>
-
-          <p className="mt-8 text-sm text-muted-foreground">
-            무료 사용 · 회원가입 없이 이용 가능 · 자영업자 맞춤 도구
-          </p>
         </div>
+
+        <HeroVisual />
       </div>
     </section>
   )

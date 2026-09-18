@@ -15,12 +15,12 @@ import {
   getCategoryCounts,
   getRequestStats,
   getRoadmapRequests,
+  isRequestsStoreConfigured,
   listFeatureRequests,
   type RequestSort,
 } from "@/lib/requests/queries"
 import { SITE_NAME, SITE_URL } from "@/lib/site-config"
 import type { FeatureRequestCategory } from "@/lib/supabase/database.types"
-import { isSupabaseConfigured } from "@/lib/supabase/client"
 
 export const metadata: Metadata = {
   title: `기능 요청 | ${SITE_NAME}`,
@@ -75,7 +75,7 @@ export default async function RequestsPage({ searchParams }: PageProps) {
     getRoadmapRequests(),
   ])
 
-  const configured = isSupabaseConfigured()
+  const configured = isRequestsStoreConfigured()
 
   return (
     <SiteLayout>
@@ -91,7 +91,7 @@ export default async function RequestsPage({ searchParams }: PageProps) {
           </div>
         ) : null}
 
-        <section className="space-y-6">
+        <section id="request-list" className="scroll-mt-24 space-y-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-foreground">
