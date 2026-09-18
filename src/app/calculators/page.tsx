@@ -6,13 +6,14 @@ import { SiteLayout } from "@/components/site-layout"
 import { SITE_NAME } from "@/lib/site-config"
 
 export const metadata: Metadata = {
-  title: "사장님 계산기 모음 | 부가세·주휴수당·퇴직금·배달마진 계산기",
+  title: "사장님 계산기 모음 | 부가세·주휴수당·배달마진 | 사장만",
   description:
-    "자영업자와 소상공인을 위한 무료 계산기 모음. 부가세, 주휴수당, 퇴직금, 4대보험, 손익분기점, 원가율 계산기를 무료로 이용하세요.",
+    "자영업자·소상공인을 위한 무료 계산기. 부가세, 주휴수당, 퇴직금, 4대보험, 손익분기점, 원가율 등을 바로 계산하세요.",
+  alternates: { canonical: "/calculators" },
   openGraph: {
     title: `사장님 계산기 모음 | ${SITE_NAME}`,
     description:
-      "자영업자와 소상공인을 위한 무료 계산기 모음. 부가세, 주휴수당, 퇴직금, 4대보험, 손익분기점, 원가율 계산기를 무료로 이용하세요.",
+      "부가세, 주휴수당, 퇴직금, 4대보험, 손익분기점, 원가율 계산기를 무료로 이용하세요.",
     url: "/calculators",
     type: "website",
   },

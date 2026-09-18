@@ -9,7 +9,16 @@ import { PRIVACY_EFFECTIVE_DATE, PRIVACY_SECTIONS } from "@/data/legal/privacy"
 
 export const metadata: Metadata = {
   title: "사장만 개인정보처리방침",
-  description: "사장만 개인정보처리방침 및 개인정보 처리 기준 안내",
+  description:
+    "사장만의 개인정보 처리 기준, 쿠키·Analytics·AdSense 이용 안내와 문의 방법을 안내합니다.",
+  alternates: { canonical: "/privacy" },
+  openGraph: {
+    title: "사장만 개인정보처리방침",
+    description:
+      "개인정보 처리 기준과 쿠키·광고 관련 안내입니다.",
+    url: "/privacy",
+    type: "website",
+  },
 }
 
 function formatEffectiveDate(date: string): string {

@@ -34,6 +34,8 @@ const STATIC_PAGES: SitemapPageConfig[] = [
   { path: "/calculators", changeFrequency: "weekly", priority: 0.9 },
   { path: "/documents", changeFrequency: "weekly", priority: 0.9 },
   { path: "/resources", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/about", changeFrequency: "monthly", priority: 0.5 },
+  { path: "/contact", changeFrequency: "monthly", priority: 0.5 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
 ]

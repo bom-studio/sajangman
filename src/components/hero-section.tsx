@@ -12,13 +12,16 @@ export function HeroSection() {
       <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8 lg:py-32">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            사장님, 장사만 하세요.
+            <span className="text-primary">사장</span>만
           </h1>
+          <p className="mt-4 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+            사장님, 장사만 하세요.
+          </p>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-            계산, 문서작성, 운영 가이드까지
+            자영업자·소상공인이 운영에 필요한 숫자와 정보를
             <br className="hidden sm:block" />
-            사장님이 자주 쓰는 업무 도구를 한곳에서 무료로 이용하세요.
+            빠르게 확인할 수 있는 무료 실무 도구입니다.
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4">

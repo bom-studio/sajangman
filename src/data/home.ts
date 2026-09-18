@@ -138,7 +138,8 @@ export function getHomeServiceCategories(): HomeServiceCategory[] {
     },
     {
       title: "문서작성",
-      description: "견적서와 거래명세서를 빠르게 작성하고 PDF로 저장",
+      description:
+        "견적서, 거래명세서, 발주서, 영수증 등 업무 문서를 PDF로 작성",
       href: "/documents",
       buttonLabel: "문서작성 보기",
       icon: FileText,

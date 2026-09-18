@@ -1,12 +1,19 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { Download } from "lucide-react"
 
+import { CalculatorFaq } from "@/components/calculators/calculator-faq"
 import { EstimateToast } from "@/components/estimate/estimate-toast"
 import { StatementForm } from "@/components/statement/statement-form"
 import { StatementPreview } from "@/components/statement/statement-preview"
 import { Button } from "@/components/ui/button"
+import {
+  STATEMENT_FAQ_ITEMS,
+  STATEMENT_GUIDE_DESCRIPTION,
+  STATEMENT_GUIDE_ITEMS,
+} from "@/lib/faq/statement-faq"
 import { loadStoredSupplier, saveStoredSupplier } from "@/lib/estimate-storage"
 import {
   loadStoredBankAccount,
@@ -19,6 +26,20 @@ import {
   getStatementPdfFilename,
 } from "@/lib/statement-pdf"
 import { getDefaultStatementData, type StatementData } from "@/lib/statement"
+
+const RELATED_DOCUMENTS = [
+  { title: "견적서 생성기", href: "/documents/estimate" },
+  { title: "영수증 생성기", href: "/documents/receipt" },
+  { title: "납품서 생성기", href: "/documents/delivery-note" },
+  { title: "거래확인서 생성기", href: "/documents/transaction-confirmation" },
+] as const
+
+const RELATED_CALCULATORS = [
+  { title: "부가세 계산기", href: "/calculators/vat" },
+  { title: "원가율 계산기", href: "/calculators/cost-rate" },
+  { title: "카드 수수료 계산기", href: "/calculators/card-fee" },
+  { title: "손익분기점 계산기", href: "/calculators/break-even" },
+] as const
 
 export function StatementGenerator() {
   const [data, setData] = useState<StatementData>(getDefaultStatementData)
@@ -144,6 +165,49 @@ export function StatementGenerator() {
             </div>
             <StatementPreview data={data} sealUrl={sealUrl} />
           </div>
+        </div>
+
+        <div className="mt-16 space-y-12">
+          <CalculatorFaq
+            title="거래명세서 가이드"
+            description={STATEMENT_GUIDE_DESCRIPTION}
+            items={STATEMENT_GUIDE_ITEMS}
+          />
+          <CalculatorFaq
+            title="자주 묻는 질문"
+            items={STATEMENT_FAQ_ITEMS}
+            defaultOpenFirst={false}
+          />
+
+          <section>
+            <h2 className="mb-4 text-lg font-semibold">관련 문서</h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {RELATED_DOCUMENTS.map((doc) => (
+                <Link
+                  key={doc.href}
+                  href={doc.href}
+                  className="rounded-xl border border-border/70 px-4 py-3 text-sm font-medium transition-colors hover:border-primary/30 hover:bg-primary/5"
+                >
+                  {doc.title}
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="mb-4 text-lg font-semibold">관련 계산기</h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {RELATED_CALCULATORS.map((calc) => (
+                <Link
+                  key={calc.href}
+                  href={calc.href}
+                  className="rounded-xl border border-border/70 px-4 py-3 text-sm font-medium transition-colors hover:border-primary/30 hover:bg-primary/5"
+                >
+                  {calc.title}
+                </Link>
+              ))}
+            </div>
+          </section>
         </div>
       </div>
 

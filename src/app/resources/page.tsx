@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "자료실 | 사장만",
   description:
     "세금, 노무, 배달, 창업, 매출관리 가이드를 모은 사장만 자료실. 주휴수당, 부가세, 원가율, 손익분기점 등 소상공인 실무 콘텐츠 허브입니다.",
+  alternates: { canonical: "/resources" },
   openGraph: {
     title: `자료실 | ${SITE_NAME}`,
     description:

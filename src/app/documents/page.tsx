@@ -6,8 +6,17 @@ import { SiteLayout } from "@/components/site-layout"
 import { ToolLinkCard } from "@/components/tool-link-card"
 
 export const metadata: Metadata = {
-  title: "문서작성 | 사장만",
-  description: "견적서, 거래명세서, 발주서 등 사장님 업무에 필요한 문서를 무료로 작성하세요.",
+  title: "문서작성 | 견적서·거래명세서·영수증 PDF | 사장만",
+  description:
+    "견적서, 거래명세서, 발주서, 영수증 등 사장님 업무 문서를 작성하고 PDF로 저장하세요.",
+  alternates: { canonical: "/documents" },
+  openGraph: {
+    title: "문서작성 | 사장만",
+    description:
+      "견적서, 거래명세서, 발주서, 영수증 등 업무 문서를 무료로 작성하세요.",
+    url: "/documents",
+    type: "website",
+  },
 }
 
 const documents = [

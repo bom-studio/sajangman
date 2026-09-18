@@ -9,7 +9,15 @@ import { TERMS_EFFECTIVE_DATE, TERMS_SECTIONS } from "@/data/legal/terms"
 
 export const metadata: Metadata = {
   title: "사장만 이용약관",
-  description: "사장만 서비스 이용약관 안내",
+  description:
+    "사장만 서비스 이용 조건, 계산 결과의 참고용 성격, 책임 제한과 문의 방법을 안내합니다.",
+  alternates: { canonical: "/terms" },
+  openGraph: {
+    title: "사장만 이용약관",
+    description: "서비스 이용 조건과 책임 범위 안내입니다.",
+    url: "/terms",
+    type: "website",
+  },
 }
 
 function formatEffectiveDate(date: string): string {

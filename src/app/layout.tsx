@@ -17,13 +17,16 @@ const gaId = process.env.NEXT_PUBLIC_GA_ID
 const ADSENSE_CLIENT_ID = "ca-pub-2530285890343256"
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://sajangman.vercel.app"
+  ),
   title: "사장만 | 사장님, 장사만 하세요.",
   description:
     "견적서 작성부터 계산기까지, 소상공인과 자영업자를 위한 무료 업무 도구 플랫폼.",
   verification: {
     google: "g3IcuYRLD4JvvFva4DST6uZWnEfn_dpQUy2npAgbauE",
     other: {
-      "naver-site-verification" : "ea4551a9c514254aafde69a55dd79fb2b698b480",
+      "naver-site-verification": "ea4551a9c514254aafde69a55dd79fb2b698b480",
     },
   },
 }
