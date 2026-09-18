@@ -1,10 +1,14 @@
+"use client"
+
 import Image from "next/image"
+import { useEffect, useRef, useState } from "react"
 import { ArrowRight, Check } from "lucide-react"
 
 import {
   BOM_STUDIO_FREE_PREVIEW_URL,
   OPERATOR_NAME,
 } from "@/lib/site-config"
+import { cn } from "@/lib/utils"
 
 const FEATURES = [
   "무료 시안",
@@ -17,14 +21,62 @@ const FEATURES = [
  * Desktop-only fixed BOM STUDIO side ad.
  * Hidden below ~1700px so it never overlaps the 1200px main column.
  * No close control — always visible on large viewports.
+ * Motion: CSS enter + periodic CTA nudge; scroll nudge once (JS).
  */
 export function BomStudioFloatingAd() {
+  const [entered, setEntered] = useState(false)
+  const [scrollNudge, setScrollNudge] = useState(false)
+  const didScrollNudge = useRef(false)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)")
+    if (reduced.matches) {
+      setEntered(true)
+      return
+    }
+
+    const onScroll = () => {
+      if (didScrollNudge.current) return
+      if (window.scrollY < window.innerHeight * 0.9) return
+
+      didScrollNudge.current = true
+      setScrollNudge(true)
+      window.removeEventListener("scroll", onScroll)
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
   return (
     <aside
-      className="pointer-events-none fixed top-[128px] right-7 z-40 hidden w-[200px] max-h-[calc(100vh-9.5rem)] min-[1700px]:block"
+      className="bom-studio-floating-ad pointer-events-none fixed top-[128px] right-7 z-40 hidden w-[200px] max-h-[calc(100vh-9.5rem)] min-[1700px]:block"
       aria-label="BOM STUDIO 홈페이지 제작 광고"
     >
-      <div className="pointer-events-auto relative flex max-h-[calc(100vh-9.5rem)] flex-col overflow-hidden rounded-[22px] border border-[#F5C2C5] bg-white shadow-[0_12px_32px_rgba(15,23,42,0.12)]">
+      <div
+        className={cn(
+          "bom-ad-card pointer-events-auto relative flex max-h-[calc(100vh-9.5rem)] flex-col overflow-hidden rounded-[22px] border border-[#F5C2C5] bg-white shadow-[0_12px_32px_rgba(15,23,42,0.12)]",
+          entered && "is-entered",
+          scrollNudge && "is-scroll-nudge"
+        )}
+        onAnimationEnd={(event) => {
+          if (event.target !== event.currentTarget) return
+
+          if (event.animationName === "bom-ad-enter") {
+            setEntered(true)
+            return
+          }
+
+          if (
+            scrollNudge &&
+            event.animationName === "bom-ad-scroll-nudge"
+          ) {
+            setScrollNudge(false)
+          }
+        }}
+      >
         <div
           aria-hidden
           className="pointer-events-none absolute -right-8 top-[88px] size-28 rounded-full bg-[#EF111B]/[0.06]"
@@ -36,11 +88,15 @@ export function BomStudioFloatingAd() {
 
         <div className="relative flex shrink-0 flex-col items-start justify-center bg-[#EF111B] px-4 py-5">
           <div className="flex items-center gap-2.5">
-            <span
-              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-[17px] font-black leading-none tracking-tight text-[#EF111B]"
-              aria-hidden
-            >
-              B
+            <span className="relative flex size-[38px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-white p-1">
+              <Image
+                src="/home/bomstudio_logo.png"
+                alt=""
+                width={38}
+                height={38}
+                className="h-full w-full object-contain"
+                aria-hidden
+              />
             </span>
             <div className="min-w-0">
               <p className="text-[13px] font-extrabold leading-tight tracking-wide text-white">
@@ -99,10 +155,10 @@ export function BomStudioFloatingAd() {
             href={BOM_STUDIO_FREE_PREVIEW_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3.5 inline-flex h-[48px] w-full shrink-0 items-center justify-center gap-1.5 rounded-[12px] bg-[#EF111B] text-[13px] font-bold text-white transition-colors hover:bg-[#D90D17] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EF111B] focus-visible:ring-offset-2"
+            className="bom-ad-cta mt-3.5 inline-flex h-[48px] w-full shrink-0 items-center justify-center gap-1.5 rounded-[12px] bg-[#EF111B] text-[13px] font-bold text-white transition-colors hover:bg-[#D90D17] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EF111B] focus-visible:ring-offset-2"
           >
             무료 시안 신청하기
-            <ArrowRight className="size-3.5" aria-hidden />
+            <ArrowRight className="bom-ad-cta-arrow size-3.5" aria-hidden />
           </a>
 
           <div className="mt-3 flex items-end justify-between gap-2">
@@ -114,12 +170,14 @@ export function BomStudioFloatingAd() {
                 홈페이지 제작 · 웹개발
               </p>
             </div>
-            <span
-              className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#EF111B] text-[12px] font-black text-white"
+            <Image
+              src="/home/bomstudio_logo.png"
+              alt=""
+              width={26}
+              height={26}
+              className="size-[26px] shrink-0 object-contain"
               aria-hidden
-            >
-              B
-            </span>
+            />
           </div>
         </div>
       </div>

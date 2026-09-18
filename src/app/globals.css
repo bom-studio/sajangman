@@ -164,3 +164,273 @@
     margin: 0 auto;
   }
 }
+
+/* BOM STUDIO fixed side ad — subtle attention (design unchanged) */
+@keyframes bom-ad-enter {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  72% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  86% {
+    opacity: 1;
+    transform: translateX(0) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes bom-ad-cta-attention {
+  0%,
+  94% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 17, 27, 0);
+  }
+  97% {
+    transform: scale(1.025);
+    box-shadow: 0 0 0 4px rgba(239, 17, 27, 0.16);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 17, 27, 0);
+  }
+}
+
+@keyframes bom-ad-arrow-nudge {
+  0%,
+  94% {
+    transform: translateX(0);
+  }
+  97% {
+    transform: translateX(3px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes bom-ad-scroll-nudge {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(0) scale(1.015);
+  }
+}
+
+.bom-studio-floating-ad .bom-ad-card {
+  animation: bom-ad-enter 600ms ease-out both;
+  transition: transform 200ms ease;
+  transform-origin: center right;
+}
+
+.bom-studio-floating-ad .bom-ad-card.is-entered {
+  animation: none;
+}
+
+.bom-studio-floating-ad .bom-ad-card.is-entered:hover {
+  transform: translateY(-2px);
+}
+
+.bom-studio-floating-ad .bom-ad-cta {
+  animation: bom-ad-cta-attention 13.5s ease-in-out infinite;
+  animation-delay: 1.8s;
+  transform-origin: center;
+}
+
+.bom-studio-floating-ad .bom-ad-cta-arrow {
+  display: inline-block;
+  animation: bom-ad-arrow-nudge 13.5s ease-in-out infinite;
+  animation-delay: 1.8s;
+}
+
+.bom-studio-floating-ad .bom-ad-card:hover .bom-ad-cta,
+.bom-studio-floating-ad .bom-ad-card:hover .bom-ad-cta-arrow {
+  animation-play-state: paused;
+}
+
+.bom-studio-floating-ad .bom-ad-card.is-entered.is-scroll-nudge {
+  animation: bom-ad-scroll-nudge 520ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bom-studio-floating-ad .bom-ad-card,
+  .bom-studio-floating-ad .bom-ad-card.is-entered,
+  .bom-studio-floating-ad .bom-ad-card.is-entered.is-scroll-nudge,
+  .bom-studio-floating-ad .bom-ad-cta,
+  .bom-studio-floating-ad .bom-ad-cta-arrow {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+  }
+
+  .bom-studio-floating-ad .bom-ad-card.is-entered:hover {
+    transform: none !important;
+  }
+}
+
+/* BOM STUDIO in-page CTA banner ? scroll enter (design unchanged) */
+@keyframes bom-cta-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bom-cta-media-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bom-cta-btn-pop {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 17, 27, 0);
+  }
+  45% {
+    transform: scale(1.035);
+    box-shadow: 0 8px 22px rgba(239, 17, 27, 0.28);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 17, 27, 0);
+  }
+}
+
+@keyframes bom-cta-arrow-once {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  45% {
+    transform: translateX(4px);
+  }
+}
+
+.bom-cta-banner {
+  opacity: 0.75;
+  transform: translateY(20px) scale(0.985);
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.bom-cta-banner.is-inview {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.bom-cta-banner .bom-cta-line1,
+.bom-cta-banner .bom-cta-line2,
+.bom-cta-banner .bom-cta-rest {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.bom-cta-banner .bom-cta-media {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.bom-cta-banner.is-inview .bom-cta-line1 {
+  animation: bom-cta-fade-up 420ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+
+.bom-cta-banner.is-inview .bom-cta-line2 {
+  animation: bom-cta-fade-up 420ms cubic-bezier(0.22, 1, 0.36, 1) 300ms both;
+}
+
+.bom-cta-banner.is-inview .bom-cta-rest {
+  animation: bom-cta-fade-up 420ms cubic-bezier(0.22, 1, 0.36, 1) 480ms both;
+}
+
+.bom-cta-banner.is-inview .bom-cta-media {
+  animation: bom-cta-media-in 650ms cubic-bezier(0.22, 1, 0.36, 1) 200ms both;
+}
+
+.bom-cta-banner.is-inview .bom-cta-btn {
+  animation: bom-cta-btn-pop 560ms cubic-bezier(0.22, 1, 0.36, 1) 1100ms both;
+}
+
+.bom-cta-banner.is-inview .bom-cta-btn-arrow {
+  animation: bom-cta-arrow-once 560ms cubic-bezier(0.22, 1, 0.36, 1) 1100ms both;
+}
+
+@media (max-width: 767px) {
+  .bom-cta-banner {
+    transform: translateY(10px) scale(0.99);
+  }
+
+  .bom-cta-banner .bom-cta-line1,
+  .bom-cta-banner .bom-cta-line2,
+  .bom-cta-banner .bom-cta-rest {
+    transform: translateY(5px);
+  }
+
+  .bom-cta-banner .bom-cta-media {
+    transform: translateX(10px);
+  }
+
+  @keyframes bom-cta-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes bom-cta-media-in {
+    from {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bom-cta-banner,
+  .bom-cta-banner.is-inview,
+  .bom-cta-banner .bom-cta-line1,
+  .bom-cta-banner .bom-cta-line2,
+  .bom-cta-banner .bom-cta-rest,
+  .bom-cta-banner .bom-cta-media,
+  .bom-cta-banner.is-inview .bom-cta-line1,
+  .bom-cta-banner.is-inview .bom-cta-line2,
+  .bom-cta-banner.is-inview .bom-cta-rest,
+  .bom-cta-banner.is-inview .bom-cta-media,
+  .bom-cta-banner.is-inview .bom-cta-btn,
+  .bom-cta-banner.is-inview .bom-cta-btn-arrow {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    will-change: auto;
+  }
+}
