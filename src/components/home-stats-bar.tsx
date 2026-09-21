@@ -4,13 +4,13 @@ export type HomeStatMetric = {
   key: "totalVisits" | "uniqueVisitors" | "calculatorUses" | "documentCreates"
   label: string
   unit: "회" | "명"
-  /** Real computed/display value only — omit or null to hide (never hardcode). */
+  /** Real computed/display value only — omit or null for unavailable. */
   value: number | null
 }
 
 type HomeStatsBarProps = {
   visitCount: number | null
-  /** Optional future metrics — only rendered when value is a number. */
+  /** Optional future metrics — only rendered when provided. */
   metrics?: HomeStatMetric[]
 }
 
@@ -35,35 +35,24 @@ function Divider() {
 
 /**
  * Floating stats card bridging Hero and the next white section.
- * Extensible via metrics; currently emphasizes total visit sessions.
+ * Always renders — never hide the bar when visit count is unavailable.
  */
 export function HomeStatsBar({ visitCount, metrics }: HomeStatsBarProps) {
-  const resolved: HomeStatMetric[] =
-    metrics ??
-    (typeof visitCount === "number"
-      ? [
-          {
-            key: "totalVisits",
-            label: "누적 방문",
-            unit: "회",
-            value: visitCount,
-          },
-        ]
-      : [])
+  const primary: HomeStatMetric =
+    metrics?.find((m) => m.key === "totalVisits") ??
+    ({
+      key: "totalVisits",
+      label: "누적 방문",
+      unit: "회",
+      value: typeof visitCount === "number" ? visitCount : null,
+    } satisfies HomeStatMetric)
 
-  const visible = resolved.filter(
-    (m): m is HomeStatMetric & { value: number } => typeof m.value === "number"
-  )
-
-  if (visible.length === 0) return null
-
-  const primary = visible[0]
+  const hasValue = typeof primary.value === "number"
 
   return (
     <div className="relative z-10 -mt-[46px] px-4 sm:-mt-[52px] sm:px-6 lg:-mt-[56px] lg:px-8">
       <div className="mx-auto max-w-[1200px]">
         <div className="flex min-h-[92px] flex-col justify-center gap-3 rounded-[20px] border border-[#E5EAF2] bg-white px-5 py-4 shadow-[0_8px_28px_rgba(15,23,42,0.06)] sm:min-h-[96px] sm:px-7 sm:py-4 lg:min-h-[100px] lg:flex-row lg:items-center lg:gap-0 lg:px-8">
-          {/* Left — live stat */}
           <div className="flex min-w-0 items-center gap-3.5 lg:w-[28%] lg:shrink-0 lg:gap-4">
             <div
               className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
@@ -75,18 +64,23 @@ export function HomeStatsBar({ visitCount, metrics }: HomeStatsBarProps) {
               <p className="text-[12px] font-medium tracking-wide text-[#64748B]">
                 {primary.label}
               </p>
-              <p className="mt-0.5 text-[26px] font-extrabold leading-none tracking-tight text-primary sm:text-[28px]">
-                {formatCount(primary.value)}
-                <span className="ml-0.5 text-[17px] font-bold sm:text-[18px]">
-                  {primary.unit}
-                </span>
-              </p>
+              {hasValue ? (
+                <p className="mt-0.5 text-[26px] font-extrabold leading-none tracking-tight text-primary sm:text-[28px]">
+                  {formatCount(primary.value as number)}
+                  <span className="ml-0.5 text-[17px] font-bold sm:text-[18px]">
+                    {primary.unit}
+                  </span>
+                </p>
+              ) : (
+                <p className="mt-0.5 text-[22px] font-bold leading-none tracking-tight text-[#94A3B8] sm:text-[24px]">
+                  집계 중
+                </p>
+              )}
             </div>
           </div>
 
           <Divider />
 
-          {/* Center — service copy (desktop+) */}
           <div className="hidden min-w-0 lg:block lg:w-[32%] lg:shrink-0">
             <p className="text-[15px] font-semibold leading-snug text-[#0F172A]">
               사장님을 위한 무료 업무 도구
@@ -98,7 +92,6 @@ export function HomeStatsBar({ visitCount, metrics }: HomeStatsBarProps) {
 
           <Divider />
 
-          {/* Right — feature badges */}
           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5 lg:w-[40%] lg:justify-end lg:gap-x-2.5">
             {FEATURE_BADGES.map((label) => (
               <span

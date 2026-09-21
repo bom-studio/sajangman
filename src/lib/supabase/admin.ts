@@ -30,10 +30,8 @@ export function isSupabaseAdminConfigured(): boolean {
   return getAdminEnv() !== null
 }
 
-/** Safe diagnostics for local debugging — never logs secret values. */
+/** Safe diagnostics — never logs secret values. Enabled in production for Vercel Logs. */
 export function logSupabaseAdminDiagnostics(context: string, error?: unknown) {
-  if (process.env.NODE_ENV === "production") return
-
   const url = trimEnv(process.env.NEXT_PUBLIC_SUPABASE_URL)
   const serviceRoleKey = trimEnv(process.env.SUPABASE_SERVICE_ROLE_KEY)
   const hostname = url ? getSupabaseHostname(url) : null
@@ -91,17 +89,21 @@ export function logSupabaseAdminDiagnostics(context: string, error?: unknown) {
 let didLogConfigOnce = false
 
 function logConfigOnce() {
-  if (didLogConfigOnce || process.env.NODE_ENV === "production") return
+  if (didLogConfigOnce) return
   didLogConfigOnce = true
 
   const env = getAdminEnv()
   if (!env) {
     console.error("[supabase:admin] missing env", {
       hasUrl: Boolean(trimEnv(process.env.NEXT_PUBLIC_SUPABASE_URL)),
-      hasServiceRoleKey: Boolean(trimEnv(process.env.SUPABASE_SERVICE_ROLE_KEY)),
+      hasServiceRoleKey: Boolean(
+        trimEnv(process.env.SUPABASE_SERVICE_ROLE_KEY)
+      ),
     })
     return
   }
+
+  if (process.env.NODE_ENV === "production") return
 
   const hostname = getSupabaseHostname(env.url)
   console.info("[supabase:admin] configured", {
