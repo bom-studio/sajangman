@@ -9,13 +9,28 @@ function trimEnv(value: string | undefined): string | undefined {
 
 function getAdminEnv() {
   const url = trimEnv(process.env.NEXT_PUBLIC_SUPABASE_URL)
-  const serviceRoleKey = trimEnv(process.env.SUPABASE_SERVICE_ROLE_KEY)
+  // Prefer legacy name used by this app; accept Supabase's newer SUPABASE_SECRET_KEY alias.
+  const serviceRoleKey =
+    trimEnv(process.env.SUPABASE_SERVICE_ROLE_KEY) ??
+    trimEnv(process.env.SUPABASE_SECRET_KEY)
 
   if (!url || !serviceRoleKey) {
     return null
   }
 
   return { url, serviceRoleKey }
+}
+
+/** Which privileged key env vars are present (booleans only — never values). */
+export function getSupabaseAdminEnvStatus() {
+  return {
+    hasUrl: Boolean(trimEnv(process.env.NEXT_PUBLIC_SUPABASE_URL)),
+    hasServiceRoleKey: Boolean(
+      trimEnv(process.env.SUPABASE_SERVICE_ROLE_KEY)
+    ),
+    hasSecretKeyAlias: Boolean(trimEnv(process.env.SUPABASE_SECRET_KEY)),
+    configured: getAdminEnv() !== null,
+  }
 }
 
 function getSupabaseHostname(url: string): string | null {
@@ -33,7 +48,9 @@ export function isSupabaseAdminConfigured(): boolean {
 /** Safe diagnostics — never logs secret values. Enabled in production for Vercel Logs. */
 export function logSupabaseAdminDiagnostics(context: string, error?: unknown) {
   const url = trimEnv(process.env.NEXT_PUBLIC_SUPABASE_URL)
-  const serviceRoleKey = trimEnv(process.env.SUPABASE_SERVICE_ROLE_KEY)
+  const serviceRoleKey =
+    trimEnv(process.env.SUPABASE_SERVICE_ROLE_KEY) ??
+    trimEnv(process.env.SUPABASE_SECRET_KEY)
   const hostname = url ? getSupabaseHostname(url) : null
   const projectRef = hostname?.endsWith(".supabase.co")
     ? hostname.replace(".supabase.co", "")
@@ -56,7 +73,10 @@ export function logSupabaseAdminDiagnostics(context: string, error?: unknown) {
 
   console.error(`[supabase:admin] ${context}`, {
     hasUrl: Boolean(url),
-    hasServiceRoleKey: Boolean(serviceRoleKey),
+    hasServiceRoleKey: Boolean(
+      trimEnv(process.env.SUPABASE_SERVICE_ROLE_KEY)
+    ),
+    hasSecretKeyAlias: Boolean(trimEnv(process.env.SUPABASE_SECRET_KEY)),
     keyFormat,
     hostname,
     projectRef,
@@ -99,6 +119,7 @@ function logConfigOnce() {
       hasServiceRoleKey: Boolean(
         trimEnv(process.env.SUPABASE_SERVICE_ROLE_KEY)
       ),
+      hasSecretKeyAlias: Boolean(trimEnv(process.env.SUPABASE_SECRET_KEY)),
     })
     return
   }

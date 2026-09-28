@@ -46,6 +46,8 @@ function logVisitorError(context: string, error?: unknown) {
     hasServiceRoleKey: Boolean(
       process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
     ),
+    hasSecretKeyAlias: Boolean(process.env.SUPABASE_SECRET_KEY?.trim()),
+    configured: isSupabaseAdminConfigured(),
     message:
       error instanceof Error
         ? error.message
@@ -230,7 +232,7 @@ export async function getTotalVisitCount(): Promise<number | null> {
   }
 
   try {
-    return await unstable_cache(
+    const count = await unstable_cache(
       fetchTotalVisitCountFromDb,
       ["site-visitors-total-visits", SITE_KEY],
       {
@@ -238,6 +240,13 @@ export async function getTotalVisitCount(): Promise<number | null> {
         tags: [`site-visitors-visits:${SITE_KEY}`],
       }
     )()
+
+    console.info("[visitors] getTotalVisitCount ok", {
+      siteKey: SITE_KEY,
+      dbSumVisitCount: count,
+    })
+
+    return count
   } catch (error) {
     logSupabaseAdminDiagnostics("getTotalVisitCount", error)
     logVisitorError("Failed to fetch total visit count", error)
